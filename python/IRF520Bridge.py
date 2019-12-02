@@ -4,7 +4,7 @@ import RPi.GPIO as io
 io.setmode(io.BCM)
 
 
-pin_number = 4
+pin_number = 16
 
 io.setup(pin_number, io.OUT)
 
