@@ -1,7 +1,7 @@
 import PythonShell from 'python-shell'
 
 const OPEN = 'open'
-const CLOSED = 'closed'
+const CLOSE = 'close'
 
 let shell
 
@@ -43,7 +43,7 @@ export const stop = () => {
 
 export const startCharging = () => setMOSFET(OPEN)
 
-export const stopCharging = () => setMOSFET(CLOSED)
+export const stopCharging = () => setMOSFET(CLOSE)
 
 export const start = debug => {
   if (!debug) {

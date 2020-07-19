@@ -16,6 +16,9 @@ def setState(state):
     elif state == "open":
         io.output(pin_number, True)
 
+def getState():
+    value = io.input(pin_number) 
+    return "open" if value else "close"
 
 def exit():
     io.output(pin_number, False)
