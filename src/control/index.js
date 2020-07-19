@@ -45,6 +45,8 @@ export const startCharging = () => setMOSFET(OPEN)
 
 export const stopCharging = () => setMOSFET(CLOSE)
 
+export const isCharging = () => getMOSFET().then(state => state === OPEN)
+
 export const start = debug => {
   if (!debug) {
     shell = new PythonShell('python/controller.py')
@@ -79,3 +81,16 @@ const setMOSFET = state => {
   shell.send(`MOSFETBridge.setState(${state})`)
   console.log('')
 }
+
+const getMOSFET = () =>
+  new Promise((resolve, reject) => {
+    shell.on('message', message => {
+      if (message.startsWith('state: ')) {
+        resolve(message.split('state: ')[1])
+      } else {
+        reject(message)
+      }
+    })
+    shell.send(`print("state: " + MOSFETBridge.getState())`)
+    console.log('')
+  })

@@ -1,4 +1,5 @@
 import { exec } from 'child_process'
+import { isCharging } from '../control'
 
 export default socket => {
   socket.on('status', () => {
@@ -9,7 +10,14 @@ export default socket => {
         return
       }
 
-      socket.emit('status', JSON.stringify(parseStatus(stdout)))
+      isCharging().then(isCharging => {
+        const status = {
+            ...parseStatus(stdout),
+            isCharging
+        }
+  
+        socket.emit('status', JSON.stringify(status))
+      })
     })
   })
 }
