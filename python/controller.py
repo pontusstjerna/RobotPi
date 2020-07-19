@@ -1,6 +1,7 @@
 import sys
 import time
 import L298NHBridge as HBridge
+import IRF520Bridge as MOSFETBridge
 
 print('Python controller ready.')
 sys.stdout.flush()
@@ -22,3 +23,4 @@ while inp != 'quit':
 
 print('User quit')
 HBridge.exit()
+MOSFETBridge.exit()

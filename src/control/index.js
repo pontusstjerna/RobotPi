@@ -1,70 +1,81 @@
-import PythonShell from 'python-shell';
+import PythonShell from 'python-shell'
 
-let shell;
+const OPEN = 'open'
+const CLOSED = 'closed'
 
-export let power = 1;
+let shell
+
+export let power = 1
 
 export const forward = () => {
-    setMotorLeft(power);
-    setMotorRight(power);
+  setMotorLeft(power)
+  setMotorRight(power)
 }
 
 export const left = () => {
-    setMotorLeft(power);
-    setMotorRight(power * 0.1);
+  setMotorLeft(power)
+  setMotorRight(power * 0.1)
 }
 
 export const right = () => {
-    setMotorLeft(power * 0.1);
-    setMotorRight(power);
+  setMotorLeft(power * 0.1)
+  setMotorRight(power)
 }
 
 export const rotLeft = () => {
-    setMotorLeft(power * 0.8);
-    setMotorRight(-power * 0.8);
+  setMotorLeft(power * 0.8)
+  setMotorRight(-power * 0.8)
 }
 
 export const rotRight = () => {
-    setMotorLeft(-power * 0.8);
-    setMotorRight(power * 0.8);
+  setMotorLeft(-power * 0.8)
+  setMotorRight(power * 0.8)
 }
 
 export const reverse = () => {
-    power = -power;
+  power = -power
 }
 
 export const stop = () => {
-    setMotorLeft(0);
-    setMotorRight(0);
+  setMotorLeft(0)
+  setMotorRight(0)
 }
 
-export const start = (debug) => {
-    
-    if(!debug) {
-        shell = new PythonShell('python/controller.py');
-    } else {
-        shell = new PythonShell('python/test.py');
-    }
+export const startCharging = () => setMOSFET(OPEN)
 
-    shell.on('message', message => {
-        console.log('py: ' + message);
-    });
+export const stopCharging = () => setMOSFET(CLOSED)
+
+export const start = debug => {
+  if (!debug) {
+    shell = new PythonShell('python/controller.py')
+  } else {
+    shell = new PythonShell('python/test.py')
+  }
+
+  shell.on('message', message => {
+    console.log('py: ' + message)
+  })
 }
 
 export const exit = () => {
-    shell.send('quit');
-    shell.end((err, code, signal) => {
-        if (err) throw err;
-        console.log('Python exited with code ' + code);
-    });
+  shell.send('quit')
+  shell.end((err, code, signal) => {
+    if (err) throw err
+    console.log('Python exited with code ' + code)
+  })
 }
 
 const setMotorRight = pwr => {
-    shell.send('HBridge.setMotorRight(' + pwr + ')');
-    console.log('');
+  shell.send('HBridge.setMotorRight(' + pwr + ')')
+  console.log('')
 }
 
 const setMotorLeft = pwr => {
-    shell.send('HBridge.setMotorLeft(' + pwr + ')');
-    console.log('');
+  shell.send('HBridge.setMotorLeft(' + pwr + ')')
+  console.log('')
+}
+
+const setMOSFET = state => {
+  shell.send(`MOSFETBridge.setState(${state})`)
+  console.log('')
 }
