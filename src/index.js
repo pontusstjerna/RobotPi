@@ -13,5 +13,5 @@ const started = socket(server)
 
 server.listen(4000, () => {
   startVideoServer(app, PORT)
-  console.log(started + ': Base server successfully started on port ' + PORT)
+  console.log(started + ': Websocket server successfully started on port ' + PORT)
 })
