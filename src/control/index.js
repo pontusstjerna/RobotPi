@@ -85,12 +85,12 @@ const setMOSFET = state => {
 const getMOSFET = () =>
   new Promise((resolve, reject) => {
     shell.on('message', message => {
-      if (message.startsWith('state: ')) {
-        resolve(message.split('state: ')[1])
+      if (message.startsWith('MOSFET: ')) {
+        resolve(message.split('MOSFET: ')[1])
       } else {
         reject(message)
       }
     })
-    shell.send(`print("state: " + MOSFETBridge.getState())`)
+    shell.send('getMOSFET')
     console.log('')
   })
