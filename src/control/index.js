@@ -78,7 +78,7 @@ const setMotorLeft = pwr => {
 }
 
 const setMOSFET = state => {
-  shell.send(`MOSFETBridge.setState(${state})`)
+  shell.send(`MOSFETBridge.setState("${state}")`)
   console.log('')
 }
 
