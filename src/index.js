@@ -6,16 +6,14 @@ import { config } from 'dotenv'
 
 config()
 
-const PORT = process.argv[3] || process.env.PORT || 4000
-
-console.log('Starting server...')
-const app = express()
-const server = http.Server(app)
+console.log('Starting up...')
 const started = connectMqtt()
 
-server.listen(PORT, () => {
+// TODO: connect to ws for video streaming
+
+/*server.listen(PORT, () => {
   startVideoServer(app, PORT)
   console.log(
     started + ': Websocket server successfully started on port ' + PORT
   )
-})
+})*/

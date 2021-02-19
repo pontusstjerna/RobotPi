@@ -7,7 +7,7 @@ let idleTimeout = null
 let lastConnected = null
 
 export default () => {
-  mqttClient = mqtt.connect({
+  const mqttClient = mqtt.connect({
     hostname: process.env.MQTT_BROKER_URL || '127.0.0.1',
     username: process.env.MQTT_USERNAME,
     password: process.env.MQTT_PASSWORD,

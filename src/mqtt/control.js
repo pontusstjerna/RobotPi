@@ -12,7 +12,7 @@ const controls = {
   stop_charging: controller.stopCharging,
 }
 
-export default message => controls[message]()
+export default message => controls[message]?.()
 
 export const exit = () => controller.exit()
 export const start = debug => controller.start(debug)
