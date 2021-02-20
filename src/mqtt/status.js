@@ -1,5 +1,10 @@
 export default (message, client) => {
   if (message === 'status') {
+    if (process.argv[2] === 'nopi') {
+      client.publish('robotpi/status', null)
+      return
+    }
+
     exec('./get_status.sh', (err, stdout, stderr) => {
       if (err) {
         client.publish('robotpi/status', null)

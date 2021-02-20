@@ -26,15 +26,17 @@ export default () => {
       }
     })
 
-    mqttClient.on('message', (topic, message) => {
+    mqttClient.on('message', (topic, messageBuffer) => {
       if (!isRunning()) {
+        console.log('Got message, will startup robot!')
         start(process.argv[2] === 'nopi')
       }
+
+      const message = messageBuffer.toString()
 
       setIdleTimeout()
       switch (message) {
         case 'started':
-          console.log('Got started  from user')
           mqttClient.publish(
             'robotpi/started',
             JSON.stringify({ started, lastConnected })
