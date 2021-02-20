@@ -10,6 +10,8 @@ let lastConnected = null
 let videoProcess = null
 
 export default () => {
+  const debug = process.argv[2] === 'nopi'
+
   const mqttClient = mqtt.connect({
     hostname: process.env.MQTT_BROKER_URL || '127.0.0.1',
     username: process.env.MQTT_USERNAME,
@@ -33,8 +35,10 @@ export default () => {
       if (!isRunning()) {
         console.log('Got message, will startup robot and video!')
 
-        start(process.argv[2] === 'nopi')
-        videoProcess = startVideoStreamProcess()
+        start(debug)
+        if (!debug) {
+          videoProcess = startVideoStreamProcess()
+        }
       }
 
       const message = messageBuffer.toString()
@@ -73,7 +77,10 @@ const setIdleTimeout = () => {
     idleTimeout = null
 
     lastConnected = new Date().toString()
-    videoProcess.kill()
+
+    if (videoProcess !== null) {
+      videoProcess.kill()
+    }
     videoProcess = null
     exit()
   }, 5 * 60 * 1000) // Keep alive for 5 minutes, then turn off

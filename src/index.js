@@ -4,7 +4,7 @@ import { config } from 'dotenv'
 config()
 
 const started = connectMqtt()
-console.log(`Cat Hunter started mqtt at ${started}`)
+console.log(`Cat Hunter started at ${started}`)
 
 // TODO: connect to ws for video streaming
 
