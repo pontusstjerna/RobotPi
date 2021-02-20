@@ -1,10 +1,13 @@
 import mqtt from 'mqtt'
 import control, { start, exit } from './control'
 import status from './status'
+import { startVideoStreamProcess } from '../video/localVideoStream'
+import video from '../video'
 
 const started = new Date().toString()
 let idleTimeout = null
 let lastConnected = null
+let videoProcess = null
 
 export default () => {
   const mqttClient = mqtt.connect({
@@ -28,8 +31,10 @@ export default () => {
 
     mqttClient.on('message', (topic, messageBuffer) => {
       if (!isRunning()) {
-        console.log('Got message, will startup robot!')
+        console.log('Got message, will startup robot and video!')
+
         start(process.argv[2] === 'nopi')
+        videoProcess = startVideoStreamProcess()
       }
 
       const message = messageBuffer.toString()
@@ -63,11 +68,13 @@ const setIdleTimeout = () => {
 
   idleTimeout = setTimeout(() => {
     // TODO: In the future, return to base?
-    console.log('Five minutes idle, will turn off.')
+    console.log('Five minutes idle, will turn off robot and video stream.')
     clearTimeout(idleTimeout)
     idleTimeout = null
 
     lastConnected = new Date().toString()
+    videoProcess.kill()
+    videoProcess = null
     exit()
   }, 5 * 60 * 1000) // Keep alive for 5 minutes, then turn off
 }

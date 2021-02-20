@@ -1,13 +1,10 @@
-import express from 'express'
-import http from 'http'
 import connectMqtt from './mqtt'
-import startVideoServer from './video'
 import { config } from 'dotenv'
 
 config()
 
-console.log('Starting up...')
 const started = connectMqtt()
+console.log(`Cat Hunter started mqtt at ${started}`)
 
 // TODO: connect to ws for video streaming
 

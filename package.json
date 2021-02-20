@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js pi 4000 --exec babel-node",
-    "nopi": "nodemon src/index.js nopi 4000 --exec babel-node",
+    "start": "nodemon src/index.js pi --exec babel-node",
+    "nopi": "nodemon src/index.js nopi --exec babel-node",
     "build": "babel src --out-dir dist --copy-files"
   },
   "repository": {
@@ -34,6 +34,7 @@
     "mqtt": "^4.2.6",
     "python-shell": "^0.5.0",
     "socket.io": "^2.1.1",
+    "socket.io-client": "^3.1.1",
     "ws": "^5.2.0"
   }
 }
