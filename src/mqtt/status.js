@@ -1,3 +1,6 @@
+import { exec } from 'child_process'
+import { isCharging } from '../control'
+
 export default (message, client) => {
   if (message === 'status') {
     if (process.argv[2] === 'nopi') {

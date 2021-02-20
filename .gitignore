@@ -5,3 +5,4 @@ robotpi/start.sh.save
 dist
 node_modules
 .env
+core
