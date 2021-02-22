@@ -37,6 +37,7 @@ export default () => {
         start(debug)
         if (!debug) {
           videoProcess = startVideoStreamProcess()
+	  console.log("Video stream started.")
         }
       }
 
