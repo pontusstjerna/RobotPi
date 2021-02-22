@@ -1,17 +1,16 @@
-import express from 'express'
-import http from 'http'
+import connectMqtt from './mqtt'
+import { config } from 'dotenv'
 
-import socket from './socket'
-import startVideoServer from './video'
+config()
 
-const PORT = process.argv[3] || 4000
+const started = connectMqtt()
+console.log(`Cat Hunter started at ${started}`)
 
-console.log('Starting server...')
-const app = express()
-const server = http.Server(app)
-const started = socket(server)
+// TODO: connect to ws for video streaming
 
-server.listen(4000, () => {
+/*server.listen(PORT, () => {
   startVideoServer(app, PORT)
-  console.log(started + ': Websocket server successfully started on port ' + PORT)
-})
+  console.log(
+    started + ': Websocket server successfully started on port ' + PORT
+  )
+})*/
