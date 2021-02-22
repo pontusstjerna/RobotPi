@@ -1,3 +1,5 @@
+import { exec } from 'child_process'
+
 export const startVideoStreamProcess = port => {
   const defaultCommand = `avconv -s 640x480 -f video4linux2 -i /dev/video0 -f mpegts -codec:v mpeg1video -codec:a mp2 -b 1000k ${process.env.VIDEO_STREAMING_URL}`
 
