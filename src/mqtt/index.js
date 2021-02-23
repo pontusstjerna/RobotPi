@@ -8,25 +8,35 @@ let idleTimeout = null
 let lastConnected = null
 let videoProcess = null
 
+const {
+  MQTT_BROKER_URL,
+  MQTT_USERNAME,
+  MQTT_PASSWORD,
+  ID,
+  VIDEO_STREAMING_URL,
+  VIDEO_STREAM_COMMAND,
+} = process.env
+
 export default () => {
   const debug = process.argv[2] === 'nopi'
 
   const mqttClient = mqtt.connect({
-    hostname: process.env.MQTT_BROKER_URL || '127.0.0.1',
-    username: process.env.MQTT_USERNAME,
-    password: process.env.MQTT_PASSWORD,
+    hostname: MQTT_BROKER_URL || '127.0.0.1',
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD,
     protocol: 'mqtt',
   })
 
   mqttClient.on('connect', () => {
-    console.log('Robotpi connected to mqtt broker')
+    console.log(
+      `"${ID}" connected to mqtt broker at ${process.env.MQTT_USERNAME}:${process.env.MQTT_BROKER_URL}`
+    )
 
-    // TODO: Possibly use unique ID for robot (to allow more than one)
-    mqttClient.subscribe('robotpi', error => {
+    mqttClient.subscribe(ID, error => {
       if (error) {
         console.log(error)
       } else {
-        console.log('Subscribed to "robotpi" topic with mqtt')
+        console.log(`Subscribed to "${ID}" topic with mqtt`)
       }
     })
 
@@ -82,5 +92,20 @@ const setIdleTimeout = () => {
     }
     videoProcess = null
     exit()
-  }, 5 * 60 * 1000) // Keep alive for 5 minutes, then turn off
+  }, parseInt(IDLE_TIMEOUT_MS) || 5 * 60 * 1000) // Keep alive for 5 minutes, then turn off
+}
+
+const startVideoStreamProcess = () => {
+  const defaultCommand = `ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpegts -codec:v mpeg1video -codec:a mp2 -b 1000k ${VIDEO_STREAMING_URL}`
+
+  return exec(
+    VIDEO_STREAM_COMMAND || defaultCommand,
+    (error, stdout, stderr) => {
+      console.log('Video streaming ended.')
+
+      if (error != null) {
+        console.log('Error with streaming: ' + error)
+      }
+    }
+  )
 }
