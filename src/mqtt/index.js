@@ -1,7 +1,7 @@
 import mqtt from 'mqtt'
 import control, { start, exit } from './control'
 import status from './status'
-import { startVideoStreamProcess } from '../localVideoStream'
+import { exec } from 'child_process'
 
 const started = new Date().toString()
 let idleTimeout = null
@@ -47,6 +47,7 @@ export default () => {
         start(debug)
         if (!debug) {
           videoProcess = startVideoStreamProcess()
+          console.log('Video stream started.')
         }
       }
 
