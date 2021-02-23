@@ -2,6 +2,9 @@ import mqtt from 'mqtt'
 import control, { start, exit } from './control'
 import status from './status'
 import { exec } from 'child_process'
+import { config } from 'dotenv'
+
+config()
 
 const started = new Date().toString()
 let idleTimeout = null
@@ -12,7 +15,7 @@ const {
   MQTT_BROKER_URL,
   MQTT_USERNAME,
   MQTT_PASSWORD,
-  ID,
+  ID = 'robotpi',
   VIDEO_STREAMING_URL,
   VIDEO_STREAM_COMMAND,
 } = process.env
@@ -20,11 +23,16 @@ const {
 export default () => {
   const debug = process.argv[2] === 'nopi'
 
+  console.log(MQTT_BROKER_URL)
   const mqttClient = mqtt.connect({
     hostname: MQTT_BROKER_URL || '127.0.0.1',
     username: MQTT_USERNAME,
     password: MQTT_PASSWORD,
     protocol: 'mqtt',
+  })
+
+  mqttClient.on('error', error => {
+    console.log(error)
   })
 
   mqttClient.on('connect', () => {
