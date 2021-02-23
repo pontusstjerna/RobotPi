@@ -1,8 +1,7 @@
 import mqtt from 'mqtt'
 import control, { start, exit } from './control'
 import status from './status'
-import { startVideoStreamProcess } from '../video/localVideoStream'
-import video from '../video'
+import { startVideoStreamProcess } from '../localVideoStream'
 
 const started = new Date().toString()
 let idleTimeout = null
