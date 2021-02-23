@@ -1,16 +1,16 @@
 import { exec } from 'child_process'
 import { isCharging } from '../control'
 
-export default (message, client) => {
+export default (message, client, ID) => {
   if (message === 'status') {
     if (process.argv[2] === 'nopi') {
-      client.publish('robotpi/status', null)
+      client.publish(`${ID}/status`, null)
       return
     }
 
     exec('./get_status.sh', (err, stdout, stderr) => {
       if (err) {
-        client.publish('robotpi/status', null)
+        client.publish(`${ID}/status`, null)
         console.log(err)
         return
       }
@@ -21,7 +21,7 @@ export default (message, client) => {
           isCharging,
         }
 
-        client.publish('robotpi/status', JSON.stringify(status))
+        client.publish(`${ID}/status`, JSON.stringify(status))
       })
     })
   }

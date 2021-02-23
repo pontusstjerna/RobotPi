@@ -16,15 +16,14 @@ const {
   MQTT_USERNAME,
   MQTT_PASSWORD,
   ID = 'robotpi',
-  VIDEO_STREAMING_URL,
-  VIDEO_STREAM_COMMAND,
-  IDLE_TIMEOUT_MS,
+  VIDEO_STREAM_HOST,
+  VIDEO_STREAM_COMMAND = 'avconv -s 640x480 -f video4linux2 -i /dev/video0 -f mpegts -codec:v mpeg1video -codec:a mp2 -b 1000k',
+  IDLE_TIMEOUT_MS = '300000',
 } = process.env
 
 export default () => {
   const debug = process.argv[2] === 'nopi'
 
-  console.log(MQTT_BROKER_URL)
   const mqttClient = mqtt.connect({
     hostname: MQTT_BROKER_URL || '127.0.0.1',
     username: MQTT_USERNAME,
@@ -66,12 +65,12 @@ export default () => {
       switch (message) {
         case 'started':
           mqttClient.publish(
-            'robotpi/started',
+            `${ID}/started`,
             JSON.stringify({ started, lastConnected })
           )
           break
         default:
-          status(message, mqttClient)
+          status(message, mqttClient, ID)
           control(message)
           break
       }
@@ -106,10 +105,11 @@ const setIdleTimeout = () => {
 }
 
 const startVideoStreamProcess = () => {
-  const defaultCommand = `ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpegts -codec:v mpeg1video -codec:a mp2 -b 1000k ${VIDEO_STREAMING_URL}`
+  const videoStreamUrl = `${VIDEO_STREAM_HOST}/video_stream/${ID}`
+  const defaultCommand = `avconv -s 640x480 -f video4linux2 -i /dev/video0 -f mpegts -codec:v mpeg1video -codec:a mp2 -b 1000k ${videoStreamUrl}`
 
   return exec(
-    VIDEO_STREAM_COMMAND || defaultCommand,
+    `${VIDEO_STREAM_COMMAND} ${videoStreamUrl}` || defaultCommand,
     (error, stdout, stderr) => {
       console.log('Video streaming ended.')
 
