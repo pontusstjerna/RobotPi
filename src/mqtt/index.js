@@ -18,6 +18,7 @@ const {
   ID = 'robotpi',
   VIDEO_STREAMING_URL,
   VIDEO_STREAM_COMMAND,
+  IDLE_TIMEOUT_MS,
 } = process.env
 
 export default () => {
