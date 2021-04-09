@@ -12,6 +12,7 @@ while inp != 'quit':
     inp = sys.stdin.readline().split('\n')[0]
     if (inp == 'getMOSFET'):
         print("MOSFET: " + MOSFETBridge.getState())
+        sys.stdout.flush()
     elif (inp != 'quit'):
         print (inp)
         sys.stdout.flush()
