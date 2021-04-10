@@ -1,4 +1,7 @@
 import connectMqtt from './mqtt'
+import startRedockInterval from './automation/redock'
 
-const started = connectMqtt()
-console.log(`Cat Hunter started at ${started}`)
+connectMqtt().then(started => {
+  console.log(`Cat Hunter started at ${started}`)
+  startRedockInterval()
+})

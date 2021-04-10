@@ -21,64 +21,65 @@ const {
   IDLE_TIMEOUT_MS = '300000',
 } = process.env
 
-export default () => {
-  const debug = process.argv[2] === 'nopi'
+export default () =>
+  new Promise((resolve, reject) => {
+    const debug = process.argv[2] === 'nopi'
 
-  const mqttClient = mqtt.connect({
-    hostname: MQTT_BROKER_URL || '127.0.0.1',
-    username: MQTT_USERNAME,
-    password: MQTT_PASSWORD,
-    protocol: 'mqtt',
-  })
-
-  mqttClient.on('error', error => {
-    console.log(error)
-  })
-
-  mqttClient.on('connect', () => {
-    console.log(
-      `"${ID}" connected to mqtt broker at ${process.env.MQTT_USERNAME}:${process.env.MQTT_BROKER_URL}`
-    )
-
-    mqttClient.subscribe(ID, error => {
-      if (error) {
-        console.log(error)
-      } else {
-        console.log(`Subscribed to "${ID}" topic with mqtt`)
-      }
+    const mqttClient = mqtt.connect({
+      hostname: MQTT_BROKER_URL || '127.0.0.1',
+      username: MQTT_USERNAME,
+      password: MQTT_PASSWORD,
+      protocol: 'mqtt',
     })
 
-    mqttClient.on('message', (topic, messageBuffer) => {
-      if (!isRunning()) {
-        console.log('Got message, will startup robot and video!')
+    mqttClient.on('error', error => {
+      console.log(error)
+    })
 
-        start(debug)
-        if (!debug) {
-          videoProcess = startVideoStreamProcess()
-          console.log('Video stream started.')
+    mqttClient.on('connect', () => {
+      console.log(
+        `"${ID}" connected to mqtt broker at ${process.env.MQTT_USERNAME}:${process.env.MQTT_BROKER_URL}`
+      )
+
+      mqttClient.subscribe(ID, error => {
+        if (error) {
+          console.log(error)
+          reject(error)
+        } else {
+          console.log(`Subscribed to "${ID}" topic with mqtt`)
+          resolve(started)
         }
-      }
+      })
 
-      const message = messageBuffer.toString()
+      mqttClient.on('message', (topic, messageBuffer) => {
+        if (!isRunning()) {
+          console.log('Got message, will startup robot and video!')
 
-      setIdleTimeout()
-      switch (message) {
-        case 'started':
-          mqttClient.publish(
-            `${ID}/started`,
-            JSON.stringify({ started, lastConnected })
-          )
-          break
-        default:
-          status(message, mqttClient, ID)
-          control(message)
-          break
-      }
+          start(debug)
+          if (!debug) {
+            videoProcess = startVideoStreamProcess()
+            console.log('Video stream started.')
+          }
+        }
+
+        const message = messageBuffer.toString()
+
+        setIdleTimeout()
+        switch (message) {
+          case 'started':
+            mqttClient.publish(
+              `${ID}/started`,
+              JSON.stringify({ started, lastConnected })
+            )
+            break
+          default:
+            status(message, mqttClient, ID)
+            control(message)
+            break
+        }
+      })
     })
   })
-
-  return started
-}
 
 const isRunning = () => idleTimeout !== null
 

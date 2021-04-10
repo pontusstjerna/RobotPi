@@ -4,8 +4,15 @@ const OPEN = 'open'
 const CLOSE = 'close'
 
 let shell
+let users = 0
 
 export let power = 1
+
+export const getPower = () => power
+
+export const setPower = (pwr = 1) => {
+  power = pwr
+}
 
 export const forward = () => {
   setMotorLeft(power)
@@ -48,23 +55,33 @@ export const stopCharging = () => setMOSFET(CLOSE)
 export const isCharging = () => getMOSFET().then(state => state === OPEN)
 
 export const start = debug => {
-  if (!debug) {
-    shell = new PythonShell('python/controller.py')
-  } else {
-    shell = new PythonShell('python/test.py')
+  if (users === 0) {
+    if (!debug) {
+      shell = new PythonShell('python/controller.py')
+    } else {
+      shell = new PythonShell('python/test.py')
+    }
+
+    shell.on('message', message => {
+      console.log('py: ' + message)
+    })
   }
 
-  shell.on('message', message => {
-    console.log('py: ' + message)
-  })
+  users++
 }
 
 export const exit = () => {
-  shell.send('quit')
-  shell.end((err, code, signal) => {
-    if (err) throw err
-    console.log('Python exited with code ' + code)
-  })
+  if (users === 1) {
+    shell.send('quit')
+    shell.end((err, code, signal) => {
+      if (err) throw err
+      console.log('Python exited with code ' + code)
+    })
+
+    shell = null
+  }
+
+  users--
 }
 
 const setMotorRight = pwr => {
