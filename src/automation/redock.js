@@ -4,27 +4,27 @@ export default () => {
   const intervalMins = process.env.REDOCK_INTERVAL_MINUTES || 60
   setInterval(() => {
     controller.start(process.argv[2] === 'nopi')
-    redock(controller)
-    clearTimeout(timeout)
-    controller.exit()
-  }, intervalMins /* * 60*/)
+    redock() //.then(controller.exit)
+  }, intervalMins * 1000 /* * 60*/)
 }
 
-const redock = () => {
-  const oldPower = controller.getPower()
-  controller.setPower(0.2)
-  controller.reverse()
+const redock = () =>
+  new Promise(resolve => {
+    const oldPower = controller.getPower()
+    controller.setPower(0.2)
+    controller.reverse()
 
-  forOneSecond(controller.forward)
-    .then(() =>
-      forOneSecond(() => {
-        controller.reverse()
-        controller.forward()
-      })
-    )
-    .then(forOneSecond(controller.stop))
-    .then(controller.setPower(oldPower))
-}
+    forOneSecond(controller.forward)
+      .then(() =>
+        forOneSecond(() => {
+          controller.reverse()
+          controller.forward()
+        })
+      )
+      .then(() => forOneSecond(controller.stop))
+      .then(() => controller.setPower(oldPower))
+      .then(resolve())
+  })
 
 const forOneSecond = action =>
   new Promise(resolve =>
