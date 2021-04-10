@@ -11,7 +11,7 @@ export default () => {
 const redock = () =>
   new Promise(resolve => {
     const oldPower = controller.getPower()
-    controller.setPower(0.13)
+    controller.setPower(0.15)
     controller.reverse()
 
     forOneSecond(controller.forward)
