@@ -21,5 +21,4 @@ def getState():
     return "open" if value else "close"
 
 def exit():
-    io.output(pin_number, False)
     io.cleanup()
