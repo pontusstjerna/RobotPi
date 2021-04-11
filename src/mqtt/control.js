@@ -10,6 +10,9 @@ const controls = {
   stop: controller.stop,
   start_charging: controller.startCharging,
   stop_charging: controller.stopCharging,
+  set_power_low: () => controller.setPower(0.12),
+  set_power_medium: () => controller.setPower(0.5),
+  set_power_high: () => controller.setPower(1.0),
 }
 
 export default message => controls[message]?.()

@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { isCharging } from '../control'
+import { getPower } from '../control'
 
 export default (message, client, ID) => {
   if (message === 'status') {
@@ -15,14 +15,11 @@ export default (message, client, ID) => {
         return
       }
 
-      isCharging().then(isCharging => {
-        const status = {
-          ...parseStatus(stdout),
-          isCharging,
-        }
-
-        client.publish(`${ID}/status`, JSON.stringify(status))
-      })
+      const status = {
+        power: getPower(),
+        ...parseStatus(stdout),
+      }
+      client.publish(`${ID}/status`, JSON.stringify(status))
     })
   }
 }
