@@ -15,7 +15,7 @@ const redock = () =>
     controller.reverse()
 
     momentarilyDo(controller.forward)
-      .then(() => momentarilyDo(controller.stop)
+      .then(() => momentarilyDo(controller.stop))
       .then(() =>
         momentarilyDo(() => {
           controller.reverse()
