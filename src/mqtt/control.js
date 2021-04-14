@@ -14,6 +14,9 @@ const controls = {
   set_power_medium_low: () => controller.setPower(0.3),
   set_power_medium: () => controller.setPower(0.5),
   set_power_high: () => controller.setPower(1.0),
+  tilt_camera_stop: controller.tiltCameraStop,
+  tilt_camera_up: controller.tiltCameraUp,
+  tilt_camera_down: controller.tiltCameraDown,
 }
 
 export default message => controls[message]?.()

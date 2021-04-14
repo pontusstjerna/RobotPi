@@ -28,3 +28,4 @@ while inp != 'quit':
 print('User quit')
 HBridge.exit()
 MOSFETBridge.exit()
+servo_controller.exit()

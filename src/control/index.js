@@ -54,6 +54,21 @@ export const stopCharging = () => setMOSFET(CLOSE)
 
 export const isCharging = () => getMOSFET().then(state => state === OPEN)
 
+export const tiltCameraStop = () => {
+  shell.send('servo_controller.stop()')
+  console.log('')
+}
+
+export const tiltCameraUp = () => {
+  shell.send('servo_controller.increase_angle()')
+  console.log('')
+}
+
+export const tiltCameraDown = () => {
+  shell.send('servo_controller.decrease_angle()')
+  console.log('')
+}
+
 export const start = debug => {
   if (users === 0) {
     if (!debug) {
