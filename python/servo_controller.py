@@ -47,7 +47,7 @@ def decrease_angle():
 def stop():
   global current_speed
   current_speed = 0
-  pwm.ChangeDutyCycle(0)
+  # pwm.ChangeDutyCycle(0)
 
 def exit():
   pwm.stop()
