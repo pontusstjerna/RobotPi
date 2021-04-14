@@ -2,6 +2,7 @@ import sys
 import time
 import L298NHBridge as HBridge
 import IRF520Bridge as MOSFETBridge
+import servo_controller
 
 print('Python controller ready.')
 sys.stdout.flush()
@@ -10,10 +11,10 @@ inp = ""
 
 while inp != 'quit':
     inp = sys.stdin.readline().split('\n')[0]
-    if (inp == 'getMOSFET'):
+    if inp == 'getMOSFET':
         print("MOSFET: " + MOSFETBridge.getState())
         sys.stdout.flush()
-    elif (inp != 'quit'):
+    elif inp != 'quit':
         print (inp)
         sys.stdout.flush()
 
