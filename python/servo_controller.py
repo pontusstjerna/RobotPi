@@ -5,9 +5,9 @@ import threading
 
 pin_number = 14
 max_cycle = 2000
-min_cycle = 1000
+min_cycle = 660
 sleep_s = 0.02
-servo_speed = 1
+servo_speed = 5
 
 # Set mode to GPIO numbers (not PIN numbers) 
 io.setwarnings(False)
