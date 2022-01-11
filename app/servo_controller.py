@@ -49,5 +49,5 @@ def stop():
   pi.set_servo_pulsewidth(pin_number, 0)
 
 def exit():
-  pwm.stop()
+  pi.stop()
   io.cleanup()

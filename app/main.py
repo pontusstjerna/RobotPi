@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import json
 from mqtt_client import MqttClient
+from controller import Controller
 import os
 import sys
 from datetime import datetime, timedelta
@@ -17,6 +18,7 @@ class RobotPi:
         self.last_connected = self.started
         self.is_running = False
         self.mqtt_client = MqttClient(on_message = self.on_message)
+        self.controller = Controller()
 
     def on_message(self, message):
         if not self.is_running:
@@ -29,6 +31,10 @@ class RobotPi:
                 "lastConnected": self.last_connected.strftime("%Y-%m-%d %H:%M:%S"),
             }))
             self.last_connected = datetime.now()
+        elif message == "status":
+            if is_debug: self.mqtt_client.publish_message("status", None)
+
+        else: self.controller.handle_message(message)
 
     def startup(self):
         self.mqtt_client.connect()
