@@ -50,6 +50,7 @@ class RobotPi:
             pass
         
         self.mqtt_client.disconnect()
+        self.controler.exit()
 
         
 print(f"Robotpi starting up with debug set to {is_debug}")

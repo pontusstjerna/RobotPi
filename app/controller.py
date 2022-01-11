@@ -37,6 +37,10 @@ class Controller:
         if command: command()
         else: print(f"Unkown command: {message}")
 
+    def exit(self):
+        L298NHBridge.exit()
+        servo_controller.exit()
+
     def __reverse(self):
         self.power = -self.power
 
