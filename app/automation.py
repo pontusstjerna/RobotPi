@@ -14,6 +14,7 @@ class Timer:
             self.action()
 
 def redock(controller):
+    controller.handle_message("set_power_low")
     controller.handle_message("backward")
     time.sleep(0.5)
     controller.handle_message("stop")
