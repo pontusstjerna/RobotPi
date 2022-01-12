@@ -19,15 +19,16 @@ class Controller:
         controls = {
             "stop": set_motors,
             "forward": set_power(1, 1),
-            "reverse": self.__reverse,
+            "backward": set_power(1, 1),
+            "reverse": self.reverse,
             "left": set_power(0.7, 1),
             "right": set_power(1, 0.7),
             "rot_left": set_power(-1, 1),
             "rot_right": set_power(1, -1),
-            "set_power_low": partial(self.__set_power, 0.15),
-            "set_power_medium_low": partial(self.__set_power, 0.3),
-            "set_power_medium": partial(self.__set_power, 0.5),
-            "set_power_high": partial(self.__set_power, 1.0),
+            "set_power_low": partial(self.set_power, 0.15),
+            "set_power_medium_low": partial(self.set_power, 0.3),
+            "set_power_medium": partial(self.set_power, 0.5),
+            "set_power_high": partial(self.set_power, 1.0),
             "tilt_camera_stop": servo_controller.stop,
             "tilt_camera_up": servo_controller.increase_angle,
             "tilt_camera_down": servo_controller.decrease_angle
@@ -41,10 +42,10 @@ class Controller:
         L298NHBridge.exit()
         servo_controller.exit()
 
-    def __reverse(self):
+    def reverse(self):
         self.power = -self.power
 
-    def __set_power(self, pwr):
+    def set_power(self, pwr):
         self.power = pwr
 
     
