@@ -12,7 +12,7 @@ from functools import partial
 load_dotenv()
 
 is_debug = os.environ.get("DEBUG") or (len(sys.argv) >= 2 and sys.argv[1] == "nopi")
-redock_interval = os.environ.get("REDOCK_INTERVAL_S") or 60 * 120 # Two hours
+redock_interval = int(os.environ.get("REDOCK_INTERVAL_S")) or 60 * 120 # Two hours
 idle_timeout_s = 60 * 5
 
 class RobotPi:
