@@ -9,7 +9,7 @@ class Timer:
         self.action = action
 
     def update(self):
-        if self.start_time + self.interval >= datetime.now():
+        if self.start_time + self.interval <= datetime.now():
             self.start_time = datetime.now()
             self.action()
 
