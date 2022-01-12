@@ -1,0 +1,3 @@
+
+class Automation:
+    hej = "hopp"
