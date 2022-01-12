@@ -15,9 +15,9 @@ class Timer:
 
 def redock(controller):
     controller.handle_message("backward")
-    time.sleep(500)
+    time.sleep(0.5)
     controller.handle_message("stop")
-    time.sleep(500)
+    time.sleep(0.5)
     controller.handle_message("forward")
-    time.sleep(500)
+    time.sleep(0.5)
     controller.handle_message("stop")

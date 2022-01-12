@@ -19,7 +19,7 @@ class Controller:
         controls = {
             "stop": set_motors,
             "forward": set_power(1, 1),
-            "backward": set_power(1, 1),
+            "backward": set_power(-1, -1),
             "reverse": self.reverse,
             "left": set_power(0.7, 1),
             "right": set_power(1, 0.7),
