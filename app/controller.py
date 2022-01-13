@@ -2,11 +2,13 @@ import L298NHBridge
 import servo_controller
 from functools import partial
 
-def set_motors(left = 0, right = 0):
+
+def set_motors(left=0, right=0):
 
     # They are inverted...
     L298NHBridge.setMotorRight(left)
     L298NHBridge.setMotorLeft(right)
+
 
 class Controller:
     def __init__(self):
@@ -14,7 +16,11 @@ class Controller:
 
     def handle_message(self, message):
         def set_power(left_power_factor, right_power_factor):
-            return partial(set_motors, self.power * left_power_factor, self.power * right_power_factor)
+            return partial(
+                set_motors,
+                self.power * left_power_factor,
+                self.power * right_power_factor,
+            )
 
         controls = {
             "stop": set_motors,
@@ -31,12 +37,14 @@ class Controller:
             "set_power_high": partial(self.set_power, 1.0),
             "tilt_camera_stop": servo_controller.stop,
             "tilt_camera_up": servo_controller.increase_angle,
-            "tilt_camera_down": servo_controller.decrease_angle
+            "tilt_camera_down": servo_controller.decrease_angle,
         }
 
         command = controls.get(message)
-        if command: command()
-        else: print(f"Unkown command: {message}")
+        if command:
+            command()
+        else:
+            print(f"Unkown command: {message}")
 
     def exit(self):
         L298NHBridge.exit()
@@ -47,10 +55,3 @@ class Controller:
 
     def set_power(self, pwr):
         self.power = pwr
-
-    
-
-
-
-
-

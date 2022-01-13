@@ -1,6 +1,7 @@
 from datetime import datetime
 import time
 
+
 class Timer:
     start_time = datetime.now()
 
@@ -12,6 +13,7 @@ class Timer:
         if self.start_time + self.interval <= datetime.now():
             self.start_time = datetime.now()
             self.action()
+
 
 def redock(controller):
     controller.handle_message("set_power_low")

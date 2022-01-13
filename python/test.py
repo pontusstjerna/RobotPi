@@ -1,13 +1,13 @@
 import sys
 import time
 
-print('Python started (TEST VERSION)');
+print("Python started (TEST VERSION)")
 sys.stdout.flush()
 
-inp = ''
+inp = ""
 
-while inp != 'quit':
+while inp != "quit":
     inp = sys.stdin.readline()
-    inp = inp.split('\n')[0]
+    inp = inp.split("\n")[0]
     print(inp)
     sys.stdout.flush()

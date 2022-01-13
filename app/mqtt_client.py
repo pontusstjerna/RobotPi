@@ -1,8 +1,8 @@
 import os
 from paho.mqtt import client as mqtt_client
 
-class MqttClient:
 
+class MqttClient:
     def __init__(self, on_message):
         self.topic = "robotpi"
         self.on_message = on_message
@@ -12,7 +12,6 @@ class MqttClient:
         username = os.environ["MQTT_USERNAME"]
         password = os.environ["MQTT_PASSWORD"]
         client_id = "robotpi-mqtt-client"
-
 
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
@@ -41,5 +40,5 @@ class MqttClient:
     def on_message_received(self, topic, userdata, msg):
         decoded_message = msg.payload.decode()
         print(f"Received {decoded_message} from topic {msg.topic}")
-        
+
         self.on_message(decoded_message)
