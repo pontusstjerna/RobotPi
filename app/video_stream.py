@@ -8,7 +8,8 @@ def start_video_stream_process():
         print("Starting video stream.")
         return subprocess.Popen(
             f"exec ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpegts -codec:v mpeg1video -codec:a mp2 -b 1000k {video_stream_host}/video_stream/robotpi",
-            stdout=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             shell=True,
         )
     else:

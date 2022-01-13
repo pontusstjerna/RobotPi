@@ -69,11 +69,14 @@ class RobotPi:
                     self.is_running = False
                     print("Timeout, stopping video stream.")
                     self.video_process.kill()
+                    self.video_process = None
 
         except KeyboardInterrupt:
             print("Exiting...")
             pass
 
+        if self.video_process:
+            self.video_process.kill()
         self.mqtt_client.disconnect()
         self.controller.exit()
 
