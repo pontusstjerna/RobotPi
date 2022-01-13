@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import time
 from automation import Timer, redock
 from functools import partial
+import video_stream
 
 load_dotenv()
 
@@ -26,7 +27,7 @@ class RobotPi:
 
     def on_message(self, message):
         if not self.is_running:
-            print("Starting video stream.")
+            self.video_process = video_stream.start_video_stream_process()
             self.is_running = True
 
         if message == "started":
@@ -49,6 +50,7 @@ class RobotPi:
                 if self.is_running and datetime.now() - self.last_connected > timedelta(seconds=idle_timeout_s):
                     self.is_running = False
                     print("Timeout, stopping video stream.")
+                    self.video_process.kill()
 
         except KeyboardInterrupt:
             print("Exiting...")
