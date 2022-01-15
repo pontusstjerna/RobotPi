@@ -1,4 +1,4 @@
-from app.status import get_status
+from status import get_status
 from dotenv import load_dotenv
 import json
 from mqtt_client import MqttClient

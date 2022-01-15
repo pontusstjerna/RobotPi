@@ -5,7 +5,7 @@ def get_status(controller):
     # Example result: b"throttled=0x0\ntemp=44.0'C\nvolt=1.2875V\nvolt=1.2000V\nvolt=1.2000V\nvolt=1.2250V\n"
     status_string = subprocess.check_output(["sh", "get_status.sh"])
     split = status_string.decode("utf-8").split("\n")
-    status_values = map(get_status_value, split)
+    status_values = [*map(get_status_value, split)]
 
     return {
         "power": controller.power,
