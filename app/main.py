@@ -1,3 +1,4 @@
+from app.status import get_status
 from dotenv import load_dotenv
 import json
 from mqtt_client import MqttClient
@@ -52,6 +53,10 @@ class RobotPi:
         elif message == "status":
             if is_debug:
                 self.mqtt_client.publish_message("status", None)
+            else:
+                self.mqtt_client.publish_message(
+                    "status", message=json.dumps(get_status(self.controller))
+                )
 
         else:
             self.controller.handle_message(message)
