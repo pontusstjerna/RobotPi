@@ -27,8 +27,8 @@ class Controller:
             "forward": set_power(1, 1),
             "backward": set_power(-1, -1),
             "reverse": self.reverse,
-            "left": set_power(0.7, 1),
-            "right": set_power(1, 0.7),
+            "left": set_power(0.3, 1),
+            "right": set_power(1, 0.3),
             "rot_left": set_power(-1, 1),
             "rot_right": set_power(1, -1),
             "set_power_low": partial(self.set_power, 0.15),
@@ -45,6 +45,9 @@ class Controller:
             command()
         else:
             print(f"Unkown command: {message}")
+
+    def exec(self, message):
+        self.handle_message(message)
 
     def exit(self):
         L298NHBridge.exit()
