@@ -10,7 +10,8 @@ class QrCodeFollower:
     def __init__(self, controller):
         self.controller = controller
 
-    def start(self):
+    def start(self, power):
+        print("Following QR code")
         # set up camera object
         cap = cv2.VideoCapture(0)
 
