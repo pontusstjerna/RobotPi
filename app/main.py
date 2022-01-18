@@ -1,3 +1,4 @@
+from operator import is_
 from dotenv import load_dotenv
 import json
 from mqtt_client import MqttClient
@@ -8,6 +9,7 @@ from datetime import datetime, timedelta
 import time
 from automation import Timer, redock
 from functools import partial
+from qr_code_follower import QrCodeFollower
 import video_stream
 
 load_dotenv()
@@ -24,6 +26,8 @@ class RobotPi:
         self.is_running = False
         self.mqtt_client = MqttClient(on_message=self.on_message)
         self.controller = Controller()
+        self.qr_follower = QrCodeFollower()
+
         self.timers = [
             Timer(
                 interval=timedelta(seconds=redock_interval),
@@ -52,7 +56,10 @@ class RobotPi:
         elif message == "status":
             if is_debug:
                 self.mqtt_client.publish_message("status", None)
-
+        elif not is_debug and message == "dock_start":
+            self.qr_follower.start()
+        elif not is_debug and message == "dock_stop":
+            self.qr_follower.stop()
         else:
             self.controller.handle_message(message)
 
