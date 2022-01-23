@@ -17,13 +17,14 @@ class QrCodeFollower:
 
     def start(self):
         print(f"Following QR code")
+        self.running = True
 
         # set up camera object
         cap = cv2.VideoCapture(0)
 
         # QR code detection object
         detector = cv2.QRCodeDetector()
-
+    
         while self.running:
             # get the image
             _, img = cap.read()
@@ -58,7 +59,6 @@ class QrCodeFollower:
                 
         # free camera object and exit
         cap.release()
-        cv2.destroyAllWindows()
 
     def stop(self):
         self.running = False
