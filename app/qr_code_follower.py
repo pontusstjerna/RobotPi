@@ -9,6 +9,7 @@ def get_dist(a, b):
 qr_dock_text = os.environ.get("QR_DOCK_TEXT") or "robotpi-dock"
 qr_follow_text = os.environ.get("QR_FOLLOW_TEXT") or "robotpi-follow"
 follow_proximity_margin = 50
+stop_diagonal_len = 200
 min_diagonal_len = 50
 
 class QrCodeFollower:
@@ -47,18 +48,16 @@ class QrCodeFollower:
                 print(f"{'top' if top_left_corner[1] < height / 2 else 'bottom'} {'left' if top_left_corner[0] < width / 2 else 'right'}")
 
                 if data == qr_dock_text or data == qr_follow_text:
-                    if self.diagonal_len == -1:
-                        self.diagonal_len = diagonal_len
-                    
                     forward_pwr = 1
                     print(f"diag_len: {diagonal_len}")
-                    print(f"self.diag_len: {self.diagonal_len}")
-                    if (diagonal_len + follow_proximity_margin) < self.diagonal_len: # QR code appears smaller -> go forward!
+                    if (diagonal_len + follow_proximity_margin) < stop_diagonal_len: # QR code appears smaller -> go forward!
                         set_motors(0.3, 0.3)    
-                    elif (diagonal_len - follow_proximity_margin) > self.diagonal_len and data == qr_follow_text: # Go backward only if follow mode is on
+                    elif (diagonal_len - follow_proximity_margin) > stop_diagonal_len:
                         set_motors(0, 0)
                     else:
                         set_motors(0, 0)
+                else: # Stop as soon as we cannot read data anymore
+                    set_motors(0, 0)
                 
         # free camera object and exit
         cap.release()
