@@ -50,11 +50,11 @@ class QrCodeFollower:
                     
                     forward_pwr = 1
                     if diagonal_len + follow_proximity_margin < self.diagonal_len: # QR code appears smaller -> go forward!
-                        self.controller.exec("forward")
+                        set_motors(0.3, 0.3)    
                     elif diagonal_len - follow_proximity_margin > self.diagonal_len and data == qr_follow_text: # Go backward only if follow mode is on
-                        self.controller.exec("backward")
+                        set_motors(0, 0)
                     else:
-                        self.controller.exec("stop")    
+                        set_motors(0, 0)
                 
         # free camera object and exit
         cap.release()

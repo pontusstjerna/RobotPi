@@ -20,6 +20,8 @@ idle_timeout_s = 60 * 5
 
 
 class RobotPi:
+    video_process = None
+
     def __init__(self):
         self.started = datetime.now()
         self.last_connected = self.started
