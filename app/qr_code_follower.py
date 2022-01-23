@@ -40,9 +40,9 @@ class QrCodeFollower:
                 top_right_corner = points[1]
                 diagonal_len = get_dist(points[0], points[2])
                 
-                print("Data: {data}")
-                print(f"Center point: {top_left_corner}")
-                print(f"Width: {width}, Height: {height}")
+                print(f"Data: {data}")
+                #print(f"Center point: {top_left_corner}")
+                #print(f"Width: {width}, Height: {height}")
 
                 print(f"{'top' if top_left_corner[1] < height / 2 else 'bottom'} {'left' if top_left_corner[0] < width / 2 else 'right'}")
 
@@ -51,6 +51,8 @@ class QrCodeFollower:
                         self.diagonal_len = diagonal_len
                     
                     forward_pwr = 1
+                    print(f"diag_len: {diagonal_len}")
+                    print(f"self.diag_len: {self.diagonal_len}")
                     if (diagonal_len + follow_proximity_margin) < self.diagonal_len: # QR code appears smaller -> go forward!
                         set_motors(0.3, 0.3)    
                     elif (diagonal_len - follow_proximity_margin) > self.diagonal_len and data == qr_follow_text: # Go backward only if follow mode is on
