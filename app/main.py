@@ -38,7 +38,7 @@ class RobotPi:
         ]
 
     def on_message(self, message):
-        if not self.is_running:
+        if not self.is_running and not message == "dock_start":
             self.video_process = video_stream.start_video_stream_process()
             self.is_running = True
 
