@@ -1,10 +1,10 @@
-from cmath import sqrt
+from math import isqrt
 import os
 import cv2
 from controller import set_motors
 
 def get_dist(a, b):
-    return sqrt(pow(b[0] - a[0], 2) + pow(b[1] - a[1], 2))
+    return isqrt(pow(b[0] - a[0], 2) + pow(b[1] - a[1], 2))
 
 qr_dock_text = os.environ.get("QR_DOCK_TEXT") or "robotpi-dock"
 qr_follow_text = os.environ.get("QR_FOLLOW_TEXT") or "robotpi-follow"
