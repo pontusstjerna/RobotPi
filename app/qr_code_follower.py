@@ -33,7 +33,7 @@ class QrCodeFollower:
             data, bounding_box, _ = detector.detectAndDecode(img)
 
             height, width, _ = img.shape
-            max_diag = get_dist(0, width + height)
+            max_diag = get_dist([0, 0], [width, height])
 
             #if there is a bounding box, draw one, along with the data
             if bounding_box is not None and data is not None:
