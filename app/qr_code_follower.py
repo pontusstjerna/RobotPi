@@ -49,7 +49,7 @@ class QrCodeFollower:
             max_diag = get_dist([0, 0], [width, height])
 
             # if there is a bounding box, draw one, along with the data
-            if bounding_box is not None and data is not None:
+            if bounding_box is not None and self.found_qr:
                 points = bounding_box[0]
                 top_left_corner = points[0]
                 top_right_corner = points[1]
@@ -74,6 +74,9 @@ class QrCodeFollower:
                     set_motors(pwr, -pwr)
                 else:
                     set_motors(pwr, pwr)
+            else:
+                set_motors(0, 0)
+
 
         # free camera object and exit
         cap.release()
