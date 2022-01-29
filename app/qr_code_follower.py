@@ -1,5 +1,5 @@
 from math import isqrt
-from multiprocessing.dummy import Process
+from multiprocessing import Process
 import os
 import cv2
 from controller import set_motors
@@ -23,6 +23,7 @@ class QrCodeFollower:
     def start(self):
         self.running = True
         self.process = Process(target=self.__follow__)
+        self.process.start()
     
     def stop(self):
         self.running = False
@@ -40,16 +41,7 @@ class QrCodeFollower:
             # get the image
             _, img = cap.read()
 
-            bounding_box = None
-
-            if not self.found_qr:
-                # get bounding box coords and data
-                # data, bounding_box, _ = detector.detectAndDecode(img)
-                data, _, _ = detector.detectAndDecode(img)
-
-                self.found_qr = data == qr_dock_text or data == qr_follow_text
-            else:
-                bounding_box, _ = detector.detect(img)
+            data, bounding_box, _ = detector.detectAndDecode(img)
 
             height, width, _ = img.shape
             max_diag = get_dist([0, 0], [width, height])
