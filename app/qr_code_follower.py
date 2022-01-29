@@ -1,4 +1,5 @@
 from math import isqrt
+from multiprocessing.dummy import Process
 import os
 import cv2
 from controller import set_motors
@@ -7,22 +8,27 @@ from controller import set_motors
 def get_dist(a, b):
     return isqrt(int(pow(b[0] - a[0], 2)) + int(pow(b[1] - a[1], 2)))
 
-
 qr_dock_text = os.environ.get("QR_DOCK_TEXT") or "robotpi-dock"
 qr_follow_text = os.environ.get("QR_FOLLOW_TEXT") or "robotpi-follow"
 follow_proximity_margin = 50
 stop_diagonal_len = 150
 min_diagonal_len = 50
 
-
 class QrCodeFollower:
     running = False
     found_qr = False
     diagonal_len = -1
 
+   
     def start(self):
-        print(f"Following QR code")
         self.running = True
+        self.process = Process(target=self.__follow__)
+    
+    def stop(self):
+        self.running = False
+        
+    def __follow__(self):
+        print(f"Following QR code")
 
         # set up camera object
         cap = cv2.VideoCapture(0)
@@ -76,11 +82,3 @@ class QrCodeFollower:
                     set_motors(pwr, pwr)
             else:
                 set_motors(0, 0)
-
-
-        # free camera object and exit
-        cap.release()
-
-    def stop(self):
-        self.running = False
-        self.found_qr = False
