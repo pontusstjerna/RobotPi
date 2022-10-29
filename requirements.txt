@@ -1,3 +1,4 @@
 paho-mqtt
 python-dotenv
 opencv-contrib-python
+pyzbar
