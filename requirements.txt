@@ -2,3 +2,4 @@ paho-mqtt
 python-dotenv
 opencv-contrib-python
 vidgear
+adafruit-circuitpython-ina260

@@ -5,8 +5,8 @@ import cv2
 import time
 import sys
 from vidgear.gears import WriteGear
-
-# from controller import set_motors
+from controller import set_motors
+from INA260_bridge import get_voltage, get_current
 
 
 def get_dist(a, b):
@@ -59,6 +59,27 @@ class VideoProcessor:
 
     def stop_follow_qr(self):
         self.follow_qr = False
+
+    def display_voltage(self, img):
+        height, _, _ = img.shape
+        cv2.putText(
+            img,
+            f"Voltage: {get_voltage()}",
+            (0, height - 50),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
+        )
+        cv2.putText(
+            img,
+            f"Current: {get_current()}",
+            (0, height - 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
+        )
 
     def start_camera(self):
         print("Starting camera stream")
@@ -128,6 +149,8 @@ class VideoProcessor:
                         (0, 255, 0),
                         2,
                     )
+
+                    self.display_voltage()
                 else:
                     set_motors(0, 0)
 

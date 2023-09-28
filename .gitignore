@@ -10,3 +10,4 @@ node_modules
 core
 pigpio-master
 master.zip
+.vscode
