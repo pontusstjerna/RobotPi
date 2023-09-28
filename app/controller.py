@@ -1,5 +1,8 @@
-import L298NHBridge
-import servo_controller
+try:
+    import L298NHBridge
+    import servo_controller
+except ImportError:
+    print("Skip import pi stuff")
 from functools import partial
 
 
@@ -11,10 +14,14 @@ def set_motors(left=0, right=0):
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, is_debug):
         self.power = 1
+        self.is_debug = is_debug
 
     def handle_message(self, message):
+        if self.is_debug:
+            return
+
         def set_power(left_power_factor, right_power_factor):
             return partial(
                 set_motors,
@@ -50,6 +57,8 @@ class Controller:
         self.handle_message(message)
 
     def exit(self):
+        if self.is_debug:
+            return
         L298NHBridge.exit()
         servo_controller.exit()
 

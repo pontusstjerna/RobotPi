@@ -3,3 +3,4 @@ python-dotenv
 opencv-contrib-python
 vidgear
 adafruit-circuitpython-ina260
+python-dotenv

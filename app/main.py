@@ -14,20 +14,18 @@ from status import get_status
 load_dotenv()
 
 is_debug = os.environ.get("DEBUG") or (len(sys.argv) >= 2 and sys.argv[1] == "nopi")
-redock_interval = int(os.environ.get("REDOCK_INTERVAL_S"))
+redock_interval = int(os.environ.get("REDOCK_INTERVAL_S") or 3600)
 idle_timeout_s = 60 * 5
 
 
 class RobotPi:
-    video_process = None
-
     def __init__(self):
         self.started = datetime.now()
         self.last_connected = self.started
         self.is_running = False
         self.mqtt_client = MqttClient(on_message=self.on_message)
-        self.controller = Controller()
-        self.video = VideoProcessor()
+        self.controller = Controller(is_debug)
+        self.video = VideoProcessor(is_debug)
 
         self.timers = [
             Timer(
@@ -38,7 +36,7 @@ class RobotPi:
 
     def on_message(self, message):
         if not self.is_running:
-            self.video_process = self.video.start()
+            self.video.start()
             self.is_running = True
 
         if message == "started":
@@ -72,7 +70,7 @@ class RobotPi:
         self.mqtt_client.connect()
         try:
             while True:
-                time.sleep(10)
+                self.video.update()
                 for timer in self.timers:
                     timer.update()
                 if self.is_running and datetime.now() - self.last_connected > timedelta(

@@ -19,6 +19,8 @@ class MqttClient:
             else:
                 print(f"Failed to connect, return code {rc}")
 
+        print(f"Connecting MQTT to {url}")
+
         client = mqtt_client.Client(client_id)
         client.username_pw_set(username, password)
         client.on_connect = on_connect
