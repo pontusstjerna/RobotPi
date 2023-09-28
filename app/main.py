@@ -1,4 +1,3 @@
-from operator import is_
 from dotenv import load_dotenv
 import json
 from mqtt_client import MqttClient
@@ -9,8 +8,8 @@ from datetime import datetime, timedelta
 import time
 from automation import Timer, redock
 from functools import partial
-from qr_code_follower import QrCodeFollower
-import video_stream
+from video import VideoProcessor
+from status import get_status
 
 load_dotenv()
 
@@ -28,7 +27,7 @@ class RobotPi:
         self.is_running = False
         self.mqtt_client = MqttClient(on_message=self.on_message)
         self.controller = Controller()
-        self.qr_follower = QrCodeFollower()
+        self.video = VideoProcessor()
 
         self.timers = [
             Timer(
@@ -38,8 +37,8 @@ class RobotPi:
         ]
 
     def on_message(self, message):
-        if not self.is_running and not message == "dock_start":
-            self.video_process = video_stream.start_video_stream_process()
+        if not self.is_running:
+            self.video_process = self.video.start()
             self.is_running = True
 
         if message == "started":
@@ -58,10 +57,14 @@ class RobotPi:
         elif message == "status":
             if is_debug:
                 self.mqtt_client.publish_message("status", None)
+            else:
+                self.mqtt_client.publish_message(
+                    "status", message=json.dumps(get_status(self.controller))
+                )
         elif not is_debug and message == "dock_start":
-            self.qr_follower.start()
+            self.video.follow_qr()
         elif not is_debug and message == "dock_stop":
-            self.qr_follower.stop()
+            self.video.stop_follow_qr()
         else:
             self.controller.handle_message(message)
 
@@ -77,15 +80,13 @@ class RobotPi:
                 ):
                     self.is_running = False
                     print("Timeout, stopping video stream.")
-                    self.video_process.kill()
-                    self.video_process = None
+                    self.video.stop()
 
         except KeyboardInterrupt:
             print("Exiting...")
             pass
 
-        if self.video_process:
-            self.video_process.kill()
+        self.video.stop()
         self.mqtt_client.disconnect()
         self.controller.exit()
 
