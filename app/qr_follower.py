@@ -9,14 +9,16 @@ def get_dist(a, b):
 
 follow_proximity_margin = 50
 stop_diagonal_len = 150
-min_diagonal_len = 50
+max_diagonal_len = 200
 max_no_reading_count = 10
 min_diagonal_len_delta = 50
+turn_factor_threshold = 0.05
+pwr = 0.3
 
 
 class QrFollower:
     last_center_point = (0, 0)
-    follow_qr = False
+    follow_qr = True
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
@@ -38,62 +40,66 @@ class QrFollower:
                 int(box[0][0]) - int(diagonal_length / 2),
                 int(box[0][1]) + int(diagonal_length / 2),
             )
-            img_horizontal_center = int(width / 2)
 
             status = f"DIAG: {diagonal_length}px"
-
-            # Remove misreadings
-            if get_dist(self.last_center_point, center_point) < min_diagonal_len_delta:
-                for i in range(len(box)):
-                    cv2.line(
-                        img,
-                        tuple(box[i].astype(int)),
-                        tuple(box[(i + 1) % len(box)].astype(int)),
-                        color=(150, 255, 150),
-                        thickness=2,
-                    )
-                    cv2.circle(
-                        img, center_point, 10, color=(150, 255, 150), thickness=2
-                    )
-
-                if self.follow_qr:
-                    turn_factor = (2 * center_point[0] / width) - 1
-                    status = f"{status}, TF: {round(turn_factor, 2)}"
-
-                    # set_motors(turn_factor, -turn_factor)
-            cv2.putText(
-                img,
-                status,
-                (0, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 255, 0),
-                2,
+            has_moved_not_so_much = (
+                get_dist(self.last_center_point, center_point) < min_diagonal_len_delta
             )
 
+            # Remove misreadings
+            if has_moved_not_so_much:
+                self.print_qr_graphics(img, box, center_point)
+
+                if self.follow_qr:
+                    self.follow_qr(img, center_point, diagonal_length)
+
+            self.print_status(img, status)
             self.last_center_point = center_point
+        else:
+            self.print_set_motors(img, 0, 0)
 
-            # else:
-            # set_motors(0, 0)
+    def follow_qr(self, img, center_point, diagonal_length):
+        width = img.shape[1]
+        turn_factor = (2 * center_point[0] / width) - 1
 
-            # pwr = 0.3
+        if turn_factor < -turn_factor_threshold:
+            self.print_set_motors(img, -pwr, pwr, "LEFT")
+        elif turn_factor > turn_factor_threshold:
+            self.print_set_motors(img, pwr, -pwr, "RIGHT")
+        elif diagonal_length < max_diagonal_len:
+            self.print_set_motors(img, pwr, pwr, "FORWARD")
+        else:
+            self.print_set_motors(img, 0, 0, "STOPPING")
 
-            # if len(qr_reading) > 0:
-            #     no_reading_count = 0
-            #     decoded = qr_reading[0]
-            #     diagonal = get_dist(decoded.polygon[0], decoded.polygon[2])
+    def print_qr_graphics(self, img, box, center_point):
+        for i in range(len(box)):
+            cv2.line(
+                img,
+                tuple(box[i].astype(int)),
+                tuple(box[(i + 1) % len(box)].astype(int)),
+                color=(150, 255, 150),
+                thickness=2,
+            )
+        cv2.circle(img, center_point, 10, color=(150, 255, 150), thickness=2)
 
-            #     movement_of_freedom = width - decoded.rect.width
+    def print_status(self, img, status):
+        cv2.putText(
+            img,
+            status,
+            (0, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
+        )
 
-            #     # 0 left, 0.5 forward, 1.0 right
-            #     turn = decoded.rect.left / movement_of_freedom
-
-            #     # print(turn)
-            #     set_motors(turn, -turn)
-
-            # else:
-            #     no_reading_count += 1
-            #     if no_reading_count >= max_no_reading_count:
-            #         no_reading_count = 0
-            #         print("Stopping.")
-            #         set_motors(0, 0)
+    def print_set_motors(self, img, left, right, msg=None):
+        cv2.putText(
+            img,
+            f"LEFT: {round(left, 2)}, RIGHT: {round(right, 2)}, {msg or ''}",
+            (0, 60),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
+        )
