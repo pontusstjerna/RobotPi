@@ -1,8 +1,8 @@
-try:
-    import L298NHBridge
-    import servo_controller
-except ImportError:
-    print("Skip import pi stuff")
+#try:
+import L298NHBridge
+import servo_controller
+#except ImportError:
+#    print("Skip import pi stuff")
 from functools import partial
 
 

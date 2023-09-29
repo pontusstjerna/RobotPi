@@ -1,6 +1,7 @@
 from math import isqrt
 import cv2
 from controller import set_motors
+import time
 
 
 def get_dist(a, b):
@@ -9,16 +10,17 @@ def get_dist(a, b):
 
 follow_proximity_margin = 50
 stop_diagonal_len = 150
-max_diagonal_len = 200
+max_diagonal_len = 450
 max_no_reading_count = 10
 min_diagonal_len_delta = 50
-turn_factor_threshold = 0.05
-pwr = 0.3
+turn_factor_threshold = 0.1
+pwr = 0.35
 
 
 class QrFollower:
     last_center_point = (0, 0)
     follow_qr = True
+    has_moved = False
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
@@ -30,15 +32,25 @@ class QrFollower:
         self.follow_qr = False
 
     def update(self, img):
+        if self.has_moved:
+            self.has_moved = False
+            return
+
         _, boxes = self.detector.detect(img)
         height, width, _ = img.shape
 
         if boxes is not None:
             box = boxes[0]
-            diagonal_length = get_dist(box[0], box[1])
+            diagonal_length = get_dist(box[0], box[2])
+            right_side_len = get_dist(box[0], box[1])
+            left_side_len = get_dist(box[2], box[3])
+            top_side_len = get_dist(box[3], box[0])
+
+            side_len_delta = left_side_len - right_side_len
+
             center_point = (
-                int(box[0][0]) - int(diagonal_length / 2),
-                int(box[0][1]) + int(diagonal_length / 2),
+                int(box[0][0]) - int(top_side_len / 2) + side_len_delta * 10,
+                int(box[0][1]) + int(top_side_len / 2),
             )
 
             status = f"DIAG: {diagonal_length}px"
@@ -52,34 +64,51 @@ class QrFollower:
 
                 if self.follow_qr:
                     self.follow_qr(img, center_point, diagonal_length)
+            else:
+                set_motors(0, 0)
 
             self.print_status(img, status)
             self.last_center_point = center_point
         else:
             self.print_set_motors(img, 0, 0)
+            set_motors(0, 0)
 
-    def follow_qr(self, img, center_point, diagonal_length):
+    def follow_qr(self, img, center_point, diagonal_len):
         width = img.shape[1]
-        turn_factor = (2 * center_point[0] / width) - 1
+        turn_factor = (0 + 2 * center_point[0] / width) - 1
+        self.has_moved = True
+        arrived = diagonal_len >= max_diagonal_len
 
-        if turn_factor < -turn_factor_threshold:
+        if turn_factor < -turn_factor_threshold and not arrived:
             self.print_set_motors(img, -pwr, pwr, "LEFT")
-        elif turn_factor > turn_factor_threshold:
+            set_motors(-pwr, pwr)
+        elif turn_factor > turn_factor_threshold and not arrived:
             self.print_set_motors(img, pwr, -pwr, "RIGHT")
-        elif diagonal_length < max_diagonal_len:
+            set_motors(pwr, -pwr)
+        elif not arrived:
             self.print_set_motors(img, pwr, pwr, "FORWARD")
+            set_motors(pwr * 0.7, pwr * 0.7)
         else:
             self.print_set_motors(img, 0, 0, "STOPPING")
+            set_motors(0, 0)
 
     def print_qr_graphics(self, img, box, center_point):
-        for i in range(len(box)):
-            cv2.line(
-                img,
-                tuple(box[i].astype(int)),
-                tuple(box[(i + 1) % len(box)].astype(int)),
-                color=(150, 255, 150),
-                thickness=2,
-            )
+        cv2.line(
+            img,
+            tuple(box[0].astype(int)),
+            tuple(box[1].astype(int)),
+            color=(150, 255, 150),
+            thickness=2,
+        )
+
+        cv2.line(
+            img,
+            tuple(box[2].astype(int)),
+            tuple(box[3].astype(int)),
+            color=(150, 150, 255),
+            thickness=2,
+        )
+
         cv2.circle(img, center_point, 10, color=(150, 255, 150), thickness=2)
 
     def print_status(self, img, status):

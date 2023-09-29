@@ -76,7 +76,7 @@ class VideoProcessor:
         if not self.is_debug:
             cv2.putText(
                 img,
-                f"Voltage: {get_voltage()}",
+                f"Voltage: {round(get_voltage(), 2)}v",
                 (0, height - 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
