@@ -2,7 +2,7 @@ from cv2.typing import MatLike
 
 
 class CVModule:
-    active = False
+    active = True
 
     def update(self, img: MatLike) -> None:
         """Update the Computer Vision module"""
