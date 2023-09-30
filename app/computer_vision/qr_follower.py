@@ -1,7 +1,9 @@
 from math import isqrt
 import cv2
 from controller import set_motors
-import time
+import config
+
+from computer_vision.cv_module import CVModule
 
 
 def get_dist(a, b):
@@ -17,19 +19,12 @@ turn_factor_threshold = 0.1
 pwr = 0.35
 
 
-class QrFollower:
+class QrFollower(CVModule):
     last_center_point = (0, 0)
-    follow_qr = True
     has_moved = False
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
-
-    def follow(self):
-        self.follow_qr = True
-
-    def stop_follow(self):
-        self.follow_qr = False
 
     def update(self, img):
         if self.has_moved:
@@ -62,16 +57,15 @@ class QrFollower:
             if has_moved_not_so_much:
                 self.print_qr_graphics(img, box, center_point)
 
-                if self.follow_qr:
+                if self.active:
                     self.follow_qr(img, center_point, diagonal_length)
             else:
-                set_motors(0, 0)
+                self.set_motors(0, 0, img)
 
             self.print_status(img, status)
             self.last_center_point = center_point
         else:
-            self.print_set_motors(img, 0, 0)
-            set_motors(0, 0)
+            self.set_motors(0, 0, img)
 
     def follow_qr(self, img, center_point, diagonal_len):
         width = img.shape[1]
@@ -80,17 +74,13 @@ class QrFollower:
         arrived = diagonal_len >= max_diagonal_len
 
         if turn_factor < -turn_factor_threshold and not arrived:
-            self.print_set_motors(img, -pwr, pwr, "LEFT")
-            set_motors(-pwr, pwr)
+            self.set_motors(-pwr, pwr, img)
         elif turn_factor > turn_factor_threshold and not arrived:
-            self.print_set_motors(img, pwr, -pwr, "RIGHT")
-            set_motors(pwr, -pwr)
+            self.set_motors(pwr, -pwr, img)
         elif not arrived:
-            self.print_set_motors(img, pwr, pwr, "FORWARD")
-            set_motors(pwr * 0.7, pwr * 0.7)
+            self.set_motors(pwr * 0.7, pwr * 0.7, img)
         else:
-            self.print_set_motors(img, 0, 0, "STOPPING")
-            set_motors(0, 0)
+            self.set_motors(0, 0, img)
 
     def print_qr_graphics(self, img, box, center_point):
         cv2.line(
@@ -111,22 +101,33 @@ class QrFollower:
 
         cv2.circle(img, center_point, 10, color=(150, 255, 150), thickness=2)
 
-    def print_status(self, img, status):
+    def set_motors(self, left, right, img):
+        msg = "STOPPING"
+        if left < right:
+            msg = "LEFT"
+        elif right < left:
+            msg = "RIGHT"
+        elif left == right:
+            msg = "FORWARD"
+
         cv2.putText(
             img,
-            status,
-            (0, 30),
+            f"LEFT: {round(left, 2)}, RIGHT: {round(right, 2)}, {msg}",
+            (0, 60),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
             (0, 255, 0),
             2,
         )
 
-    def print_set_motors(self, img, left, right, msg=None):
+        if not config.IS_DEBUG:
+            set_motors(left, right)
+
+    def print_status(self, img, status):
         cv2.putText(
             img,
-            f"LEFT: {round(left, 2)}, RIGHT: {round(right, 2)}, {msg or ''}",
-            (0, 60),
+            status,
+            (0, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
             (0, 255, 0),

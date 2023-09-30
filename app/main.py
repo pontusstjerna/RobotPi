@@ -1,40 +1,42 @@
 from dotenv import load_dotenv
+
+load_dotenv()
+
 import json
 from mqtt_client import MqttClient
 from controller import Controller
-import os
-import sys
 from datetime import datetime, timedelta
-import time
 from automation import Timer, redock
 from functools import partial
 from video import VideoProcessor
 from status import get_status
+from time import time
+from computer_vision.qr_follower import QrFollower
+from computer_vision.voltage_display import VoltageDisplay
+from automation import redock
+import config
 
-load_dotenv()
-
-is_debug = os.environ.get("DEBUG") or (len(sys.argv) >= 2 and sys.argv[1] == "nopi")
-redock_interval = int(os.environ.get("REDOCK_INTERVAL_S") or 3600)
-idle_timeout_s = 60 * 5
+if not config.IS_DEBUG:
+    from INA260_bridge import get_voltage
 
 
 class RobotPi:
+    last_message = datetime.now()
+
     def __init__(self):
         self.started = datetime.now()
         self.last_connected = self.started
         self.is_running = False
         self.mqtt_client = MqttClient(on_message=self.on_message)
-        self.controller = Controller(is_debug)
-        self.video = VideoProcessor(is_debug)
+        self.controller = Controller()
+        self.video = VideoProcessor()
+        self.qr_follower = QrFollower()
 
-        self.timers = [
-            Timer(
-                interval=timedelta(seconds=redock_interval),
-                action=partial(redock, self.controller),
-            )
-        ]
+        self.video.add_cv_module(self.qr_follower)
+        self.video.add_cv_module(VoltageDisplay())
 
     def on_message(self, message):
+        self.last_message = datetime.now()
         if not self.is_running:
             self.video.start()
             self.is_running = True
@@ -53,16 +55,16 @@ class RobotPi:
             )
             self.last_connected = datetime.now()
         elif message == "status":
-            if is_debug:
+            if config.IS_DEBUG:
                 self.mqtt_client.publish_message("status", None)
             else:
                 self.mqtt_client.publish_message(
                     "status", message=json.dumps(get_status(self.controller))
                 )
-        elif not is_debug and message == "dock_start":
-            self.video.follow_qr()
-        elif not is_debug and message == "dock_stop":
-            self.video.stop_follow_qr()
+        elif message == "dock_start" or message == "follow_qr_start":
+            self.qr_follower.activate()
+        elif message == "dock_stop" or message == "follow_qr_stop":
+            self.qr_follower.deactivate()
         else:
             self.controller.handle_message(message)
 
@@ -70,15 +72,25 @@ class RobotPi:
         self.mqtt_client.connect()
         try:
             while True:
+                # curr = time()
                 self.video.update()
-                for timer in self.timers:
-                    timer.update()
-                if self.is_running and datetime.now() - self.last_connected > timedelta(
-                    seconds=idle_timeout_s
+                # print(f"Video update took: {round((time() - curr) * 1000, 0)} ms")
+                # curr = time()
+
+                if self.is_running and datetime.now() - self.last_message > timedelta(
+                    seconds=config.IDLE_TIMEOUT_S
                 ):
                     self.is_running = False
                     print("Timeout, stopping video stream.")
                     self.video.stop()
+                # print(f"Rest took: {round((time() - curr) * 1000, 0)} ms")
+
+                if (
+                    not config.IS_DEBUG
+                    and self.is_running
+                    and get_voltage() < config.REDOCK_VOLTAGE
+                ):
+                    redock()
 
         except KeyboardInterrupt:
             print("Exiting...")
@@ -89,5 +101,5 @@ class RobotPi:
         self.controller.exit()
 
 
-print(f"Robotpi starting up with debug set to {is_debug}")
+print(f"Robotpi starting up with debug set to {config.IS_DEBUG}")
 RobotPi().startup()
