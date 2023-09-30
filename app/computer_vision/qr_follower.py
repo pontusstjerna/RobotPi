@@ -14,7 +14,7 @@ max_diagonal_len = 450
 min_diagonal_len_delta = 50
 turn_factor_threshold = 0.1
 update_interval = 3
-pwr = 0.35
+pwr = 0.5
 
 RIGHT = "RIGHT"
 LEFT = "LEFT"
@@ -41,6 +41,8 @@ class QrFollower(CVModule):
 
         # Wait couple frames after move to tackle blurry images
         if self.frames_since_move < update_interval:
+            if self.frames_since_move > 0:
+                self.set_motors(0, 0, img)
             self.frames_since_move += 1
             return
 

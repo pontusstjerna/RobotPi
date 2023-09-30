@@ -31,6 +31,7 @@ class RobotPi:
         self.controller = Controller()
         self.video = VideoProcessor()
         self.qr_follower = QrFollower()
+#        self.qr_follower.deactivate()
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay())
