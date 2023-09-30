@@ -1,10 +1,7 @@
-from cv2.typing import MatLike
-
-
 class CVModule:
     active = True
 
-    def update(self, img: MatLike) -> None:
+    def update(self, img) -> None:
         """Update the Computer Vision module"""
         pass
 

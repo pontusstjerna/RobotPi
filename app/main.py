@@ -85,12 +85,19 @@ class RobotPi:
                     self.video.stop()
                 # print(f"Rest took: {round((time() - curr) * 1000, 0)} ms")
 
-                if (
-                    not config.IS_DEBUG
-                    and self.is_running
-                    and get_voltage() < config.REDOCK_VOLTAGE
-                ):
-                    redock()
+                if not config.IS_DEBUG and self.is_running:
+                    voltage = get_voltage()
+
+                    if voltage < config.REDOCK_VOLTAGE:
+                        if voltage < 5:
+                            print(
+                                f"Voltage unreasonably low ({round(voltage, 2)}v) - will not redock"
+                            )
+                        else:
+                            print(
+                                f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
+                            )
+                            redock(self.controller)
 
         except KeyboardInterrupt:
             print("Exiting...")
