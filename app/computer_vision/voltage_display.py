@@ -7,6 +7,10 @@ if not config.IS_DEBUG:
 
 
 class VoltageDisplay(CVModule):
+
+    def __init__(self):
+        self.activate()
+
     def update(self, img):
         height, _, _ = img.shape
 
