@@ -1,5 +1,5 @@
 class CVModule:
-    active = True
+    active = False
 
     def update(self, img) -> None:
         """Update the Computer Vision module"""
