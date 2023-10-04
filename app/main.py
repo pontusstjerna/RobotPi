@@ -36,6 +36,13 @@ class RobotPi:
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay())
 
+        self.timers = [
+            Timer(
+                interval=timedelta(seconds=config.REDOCK_INTERVAL),
+                action=partial(redock, self.controller),
+            )
+        ]
+
     def on_message(self, message):
         self.last_message = datetime.now()
         if not self.is_running:
@@ -78,6 +85,9 @@ class RobotPi:
                 # print(f"Video update took: {round((time() - curr) * 1000, 0)} ms")
                 # curr = time()
 
+                for timer in self.timers:
+                    timer.update()                
+
                 if self.is_running and datetime.now() - self.last_message > timedelta(
                     seconds=config.IDLE_TIMEOUT_S
                 ):
@@ -98,7 +108,7 @@ class RobotPi:
                             print(
                                 f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                             )
-                            redock(self.controller)
+                            #redock(self.controller)
 
         except KeyboardInterrupt:
             print("Exiting...")
