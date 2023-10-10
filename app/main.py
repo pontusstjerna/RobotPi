@@ -96,7 +96,7 @@ class RobotPi:
                     self.video.stop()
                 # print(f"Rest took: {round((time() - curr) * 1000, 0)} ms")
 
-                if not config.IS_DEBUG and not self.is_running:
+                if not config.IS_DEBUG and not self.is_running and False:
                     voltage = get_voltage()
 
                     if voltage < config.REDOCK_VOLTAGE:

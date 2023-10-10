@@ -12,6 +12,8 @@ class VoltageDisplay(CVModule):
         self.activate()
 
     def update(self, img):
+        if not img:
+            return
         height, _, _ = img.shape
 
         if not config.IS_DEBUG:

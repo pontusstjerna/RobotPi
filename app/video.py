@@ -48,7 +48,8 @@ class VideoProcessor:
 
     def stop(self):
         self.running = False
-        self.writer.close()
+        if self.writer:
+            self.writer.close()
 
     def update(self):
         if not self.running:
