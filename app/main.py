@@ -23,6 +23,7 @@ if not config.IS_DEBUG:
 
 class RobotPi:
     last_message = datetime.now()
+    attempted_redocks = 0
 
     def __init__(self):
         self.started = datetime.now()
@@ -81,6 +82,12 @@ class RobotPi:
         self.mqtt_client.connect()
         try:
             while True:
+                if self.attempted_redocks >= config.MAX_REDOCK_ATTEMPTS:
+                    print(
+                        f"Attempted {self.attempted_redocks} - will unfortunately shut down (send notification in the future)"
+                    )
+                    return
+
                 self.video.update()
                 self.charge_controller.update()
 
@@ -112,12 +119,13 @@ class RobotPi:
                                 f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                             )
                             redock(self.controller)
+                            time.sleep(30)
+                            self.attempted_redocks += 1
                     else:
                         print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
                 elif not config.IS_DEBUG and not self.is_running:
-                    print(
-                        f"Voltage: {round(get_voltage(), 3)}v - is charging"
-                    )
+                    self.attempted_redocks = 0
+                    print(f"Voltage: {round(get_voltage(), 3)}v - is charging")
 
         except KeyboardInterrupt:
             print("Exiting...")
