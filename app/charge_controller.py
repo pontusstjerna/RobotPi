@@ -3,9 +3,9 @@ import config
 if not config.IS_DEBUG:
     from INA260_bridge import get_voltage
 
-max_readings = 200
+max_readings = 20
 min_charge_slope = 0.1 / 10000
-skip_updates = 4
+skip_updates = 8
 
 
 class ChargeController:

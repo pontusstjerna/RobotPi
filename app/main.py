@@ -112,9 +112,11 @@ class RobotPi:
                                 f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                             )
                             redock(self.controller)
+                    else:
+                        print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
                 elif not config.IS_DEBUG and not self.is_running:
                     print(
-                        f"Voltage: ${get_voltage()}v - charging: {'YES' if self.charge_controller.is_charging() else 'NO'}"
+                        f"Voltage: {round(get_voltage(), 3)}v - is charging"
                     )
 
         except KeyboardInterrupt:
