@@ -17,16 +17,16 @@ class VoltageDisplay(CVModule):
         if not config.IS_DEBUG:
             cv2.line(
                 img,
-                (0, height - 80),
-                (50, height - 80 + 10 * self.charge_controller.calc_charge_slope()),
+                (0, height - 100),
+                (400, int((height - 100) - 100000 * self.charge_controller.calc_charge_slope())),
                 (0, 255, 0),
                 2,
             )
             cv2.putText(
                 img,
-                f"Voltage: {round(get_voltage(), 2)}v" + ", CHARGING"
-                if self.charge_controller.is_charging
-                else "",
+                f"Voltage: {round(get_voltage(), 2)}v, slope: {round(self.charge_controller.calc_charge_slope() * 10000, 2)}" + (", CHARGING"
+                if self.charge_controller.is_charging()
+                else ""),
                 (0, height - 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,

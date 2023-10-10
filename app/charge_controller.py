@@ -3,18 +3,27 @@ import config
 if not config.IS_DEBUG:
     from INA260_bridge import get_voltage
 
-max_readings = 50
-
+max_readings = 200
+min_charge_slope = 1 / 10000
+skip_updates = 4
 
 class ChargeController:
     latest_voltage_readings = []
+    updates_since_last_read = 0
     charging = False
 
     def update(self):
+        if self.updates_since_last_read < skip_updates:
+            self.updates_since_last_read += 1
+            return
+        else:
+            self.updates_since_last_read = 0
+
         if len(self.latest_voltage_readings) >= max_readings:
             self.latest_voltage_readings.pop(0)
 
         self.latest_voltage_readings.append(get_voltage())
+        print(len(self.latest_voltage_readings))
 
     def calc_charge_slope(self):
 
@@ -36,11 +45,11 @@ class ChargeController:
         )
         denomerator = sum([pow(deviation_x, 2) for deviation_x in deviation_xs])
 
+        if denomerator == 0:
+            return 1
+
         return numerator / denomerator
 
     def is_charging(self):
         slope = self.calc_charge_slope()
-        if slope <= 0:  # We are losing current over time
-            return False
-        else:  # We are gaining current over time
-            return True
+        return slope > 0
