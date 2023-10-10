@@ -17,6 +17,10 @@ class ChargeController:
         self.latest_voltage_readings.append(get_voltage())
 
     def calc_charge_slope(self):
+
+        if len(self.latest_voltage_readings) == 0:
+            return 0
+
         # using a formula to calculate approx. slope, see: https://www.varsitytutors.com/hotmath/hotmath_help/topics/line-of-best-fit
         xs = range(len(self.latest_voltage_readings))
         ys = self.latest_voltage_readings
@@ -30,7 +34,7 @@ class ChargeController:
         numerator = sum(
             [deviation_xs[i] * deviation_ys[i] for i in range(len(deviation_xs))]
         )
-        denomerator = sum([pow(deviation_x) for deviation_x in deviation_xs])
+        denomerator = sum([pow(deviation_x, 2) for deviation_x in deviation_xs])
 
         return numerator / denomerator
 

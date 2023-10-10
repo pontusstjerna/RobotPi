@@ -81,10 +81,8 @@ class RobotPi:
         self.mqtt_client.connect()
         try:
             while True:
-                # curr = time()
                 self.video.update()
-                # print(f"Video update took: {round((time() - curr) * 1000, 0)} ms")
-                # curr = time()
+                self.charge_controller.update()
 
                 for timer in self.timers:
                     timer.update()
