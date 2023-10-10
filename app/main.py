@@ -38,10 +38,10 @@ class RobotPi:
         self.video.add_cv_module(VoltageDisplay(self.charge_controller))
 
         self.timers = [
-            Timer(
-                interval=timedelta(seconds=config.REDOCK_INTERVAL),
-                action=partial(redock, self.controller),
-            )
+            # Timer(
+            #    interval=timedelta(seconds=config.REDOCK_INTERVAL),
+            #    action=partial(redock, self.controller),
+            # )
         ]
 
     def on_message(self, message):
@@ -95,7 +95,11 @@ class RobotPi:
                     self.video.stop()
                 # print(f"Rest took: {round((time() - curr) * 1000, 0)} ms")
 
-                if not config.IS_DEBUG and not self.is_running and False:
+                if (
+                    not config.IS_DEBUG
+                    and not self.is_running
+                    and not self.charge_controller.is_charging()
+                ):
                     voltage = get_voltage()
 
                     if voltage < config.REDOCK_VOLTAGE:
@@ -107,7 +111,11 @@ class RobotPi:
                             print(
                                 f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                             )
-                            # redock(self.controller)
+                            redock(self.controller)
+                elif not config.IS_DEBUG and not self.is_running:
+                    print(
+                        f"Voltage: ${get_voltage()}v - charging: {'YES' if self.charge_controller.is_charging() else 'NO'}"
+                    )
 
         except KeyboardInterrupt:
             print("Exiting...")
