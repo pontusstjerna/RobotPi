@@ -119,7 +119,6 @@ class RobotPi:
                                 f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                             )
                             redock(self.controller)
-                            time.sleep(30)
                             self.attempted_redocks += 1
                     else:
                         print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
