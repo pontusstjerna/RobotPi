@@ -56,7 +56,10 @@ class VideoProcessor:
             time.sleep(1)
             return
 
-        _, img = self.cap.read()
+        success, img = self.cap.read()
+
+        if not success:
+            return
 
         for module in self.cv_modules:
             module.update(img)

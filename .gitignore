@@ -4,6 +4,7 @@ robotpi/python/__pycache__
 robotpi/start.sh.save
 app/.env
 app/__pycache__
+**__pycache__**
 dist
 node_modules
 .env
