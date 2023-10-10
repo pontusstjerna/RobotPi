@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from automation import Timer, redock
 from functools import partial
 from video import VideoProcessor
+from charge_controller import ChargeController
 from status import get_status
 from time import time
 from computer_vision.qr_follower import QrFollower
@@ -31,10 +32,10 @@ class RobotPi:
         self.controller = Controller()
         self.video = VideoProcessor()
         self.qr_follower = QrFollower()
-#        self.qr_follower.deactivate()
+        self.charge_controller = ChargeController()
 
         self.video.add_cv_module(self.qr_follower)
-        self.video.add_cv_module(VoltageDisplay())
+        self.video.add_cv_module(VoltageDisplay(self.charge_controller))
 
         self.timers = [
             Timer(
@@ -86,7 +87,7 @@ class RobotPi:
                 # curr = time()
 
                 for timer in self.timers:
-                    timer.update()                
+                    timer.update()
 
                 if self.is_running and datetime.now() - self.last_message > timedelta(
                     seconds=config.IDLE_TIMEOUT_S
@@ -108,7 +109,7 @@ class RobotPi:
                             print(
                                 f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                             )
-                            #redock(self.controller)
+                            # redock(self.controller)
 
         except KeyboardInterrupt:
             print("Exiting...")
