@@ -18,11 +18,25 @@ class ChargeController:
 
     def calc_charge_slope(self):
         # using a formula to calculate approx. slope, see: https://www.varsitytutors.com/hotmath/hotmath_help/topics/line-of-best-fit
-        return 0
+        xs = range(len(self.latest_voltage_readings))
+        ys = self.latest_voltage_readings
+
+        avg_xs = sum(xs) / len(xs)
+        avg_ys = sum(ys) / len(ys)
+
+        deviation_xs = [x - avg_xs for x in xs]
+        deviation_ys = [y - avg_ys for y in ys]
+
+        numerator = sum(
+            [deviation_xs[i] * deviation_ys[i] for i in range(len(deviation_xs))]
+        )
+        denomerator = sum([pow(deviation_x) for deviation_x in deviation_xs])
+
+        return numerator / denomerator
 
     def is_charging(self):
         slope = self.calc_charge_slope()
-        if slope < 0: # We are losing current over time
+        if slope <= 0:  # We are losing current over time
             return False
-        else: # We are gaining current over time
+        else:  # We are gaining current over time
             return True

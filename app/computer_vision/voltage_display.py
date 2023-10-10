@@ -18,7 +18,7 @@ class VoltageDisplay(CVModule):
             cv2.line(
                 img,
                 (0, height - 80),
-                (50, int((height - 80) * self.charge_controller.calc_charge_slope())),
+                (50, height - 80 + 10 * self.charge_controller.calc_charge_slope()),
                 (0, 255, 0),
                 2,
             )
