@@ -78,6 +78,7 @@ class RobotPi:
 
     def startup(self):
         self.mqtt_client.connect()
+        self.set_usb(on=False)
         try:
             while True:
                 if self.attempted_redocks >= config.MAX_REDOCK_ATTEMPTS:
@@ -134,7 +135,9 @@ class RobotPi:
                         f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                     )
                     redock(self.controller)
-                    sleep(10)
+                    for _ in range(200):
+                        self.charge_controller.update()
+                        sleep(0.2)
                     self.attempted_redocks += 1
             else:
                 print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
