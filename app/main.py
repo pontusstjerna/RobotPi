@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import json
+import subprocess
 from mqtt_client import MqttClient
 from controller import Controller
 from datetime import datetime, timedelta
@@ -11,7 +12,7 @@ from functools import partial
 from video import VideoProcessor
 from charge_controller import ChargeController
 from status import get_status
-from time import time
+from time import time, sleep
 from computer_vision.qr_follower import QrFollower
 from computer_vision.voltage_display import VoltageDisplay
 from automation import redock
@@ -38,16 +39,11 @@ class RobotPi:
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay(self.charge_controller))
 
-        self.timers = [
-            # Timer(
-            #    interval=timedelta(seconds=config.REDOCK_INTERVAL),
-            #    action=partial(redock, self.controller),
-            # )
-        ]
-
     def on_message(self, message):
         self.last_message = datetime.now()
         if not self.is_running:
+            subprocess.run(["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "1"])
+            sleep(10)
             self.video.start()
             self.is_running = True
 
@@ -91,16 +87,14 @@ class RobotPi:
                 self.video.update()
                 self.charge_controller.update()
 
-                for timer in self.timers:
-                    timer.update()
-
                 if self.is_running and datetime.now() - self.last_message > timedelta(
                     seconds=config.IDLE_TIMEOUT_S
                 ):
                     self.is_running = False
                     print("Timeout, stopping video stream.")
                     self.video.stop()
-                # print(f"Rest took: {round((time() - curr) * 1000, 0)} ms")
+                    sleep(5)
+                    subprocess.run(["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "0"])
 
                 if (
                     not config.IS_DEBUG
@@ -124,7 +118,7 @@ class RobotPi:
                         print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
                 elif not config.IS_DEBUG and not self.is_running:
                     self.attempted_redocks = 0
-                    print(f"Voltage: {round(get_voltage(), 3)}v - is charging")
+                    #print(f"Voltage: {round(get_voltage(), 3)}v - is charging")
 
         except KeyboardInterrupt:
             print("Exiting...")
