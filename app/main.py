@@ -42,8 +42,7 @@ class RobotPi:
     def on_message(self, message):
         self.last_message = datetime.now()
         if not self.is_running:
-            subprocess.run(["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "1"])
-            sleep(10)
+            self.set_usb(on=True)
             self.video.start()
             self.is_running = True
 
@@ -93,40 +92,51 @@ class RobotPi:
                     self.is_running = False
                     print("Timeout, stopping video stream.")
                     self.video.stop()
-                    sleep(5)
-                    subprocess.run(["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "0"])
+                    self.set_usb(on=False)
 
-                if (
-                    not config.IS_DEBUG
-                    and not self.is_running
-                    and not self.charge_controller.is_charging()
-                ):
-                    voltage = get_voltage()
-
-                    if voltage < config.REDOCK_VOLTAGE:
-                        if voltage < 5:
-                            print(
-                                f"Voltage unreasonably low ({round(voltage, 2)}v) - will not redock"
-                            )
-                        else:
-                            print(
-                                f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
-                            )
-                            redock(self.controller)
-                            self.attempted_redocks += 1
-                    else:
-                        print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
-                elif not config.IS_DEBUG and not self.is_running:
-                    self.attempted_redocks = 0
-                    #print(f"Voltage: {round(get_voltage(), 3)}v - is charging")
+                self.check_redock()
 
         except KeyboardInterrupt:
             print("Exiting...")
-            pass
 
         self.video.stop()
         self.mqtt_client.disconnect()
         self.controller.exit()
+
+    def set_usb(self, on):
+        if not on:
+            sleep(5)
+        subprocess.run(
+            ["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "1" if on else "0"]
+        )
+
+        if on:
+            sleep(10)
+
+    def check_redock(self):
+        if (
+            not config.IS_DEBUG
+            and not self.is_running
+            and not self.charge_controller.is_charging()
+        ):
+            voltage = get_voltage()
+
+            if voltage < config.REDOCK_VOLTAGE:
+                if voltage < 5:
+                    print(
+                        f"Voltage unreasonably low ({round(voltage, 2)}v) - will not redock"
+                    )
+                else:
+                    print(
+                        f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
+                    )
+                    redock(self.controller)
+                    self.attempted_redocks += 1
+            else:
+                print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
+        elif not config.IS_DEBUG and not self.is_running:
+            self.attempted_redocks = 0
+            # print(f"Voltage: {round(get_voltage(), 3)}v - is charging")
 
 
 print(f"Robotpi starting up with debug set to {config.IS_DEBUG}")
