@@ -46,6 +46,9 @@ class RobotPi:
             self.video.start()
             self.is_running = True
 
+            if config.FOLLOW_QR_DIRECTLY:
+                self.qr_follower.activate()
+
         if message == "started":
             self.mqtt_client.publish_message(
                 "started",
@@ -131,6 +134,7 @@ class RobotPi:
                         f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
                     )
                     redock(self.controller)
+                    sleep(10)
                     self.attempted_redocks += 1
             else:
                 print(f"Voltage: {round(get_voltage(), 3)}v, not charging")

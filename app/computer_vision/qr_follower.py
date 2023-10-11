@@ -60,11 +60,12 @@ class QrFollower(CVModule):
 
         _, boxes = self.detector.detect(img)
 
-        if not boxes and self.phase != ARRIVED and self.phase != LINING_UP:
+        if boxes is None and self.phase != ARRIVED and self.phase != LINING_UP:
             self.phase = SEARCHING
-        elif boxes:
+        elif boxes is not None:
             box = boxes[0]
             diagonal_length = get_dist(box[0], box[2])
+            status += f", DIAG: {diagonal_length}"
             if diagonal_length >= max_diagonal_len:
                 self.phase = ARRIVED
             elif (
@@ -76,7 +77,8 @@ class QrFollower(CVModule):
             elif self.phase == SEARCHING:
                 self.phase = FOLLOWING
 
-        self.act_on_phase(img, boxes[0] if boxes else None)
+        self.act_on_phase(img, None if boxes is None else boxes[0])
+        self.print_status(img, status)
 
     def act_on_phase(self, img, box):
         if self.phase == SEARCHING:
@@ -92,7 +94,6 @@ class QrFollower(CVModule):
                 int(box[0][1]) + int(top_side_len / 2),
             )
 
-            status += f", DIAG: {diagonal_length}px"
             has_moved_not_so_much = (
                 get_dist(self.last_center_point, center_point) < min_diagonal_len_delta
             )
@@ -102,7 +103,6 @@ class QrFollower(CVModule):
                 self.print_qr_graphics(img, box, center_point)
                 self.follow_qr(img, center_point, diagonal_length)
 
-            self.print_status(img, status)
             self.last_center_point = center_point
         elif self.phase == LINING_UP:
             self.line_up(img, box)
