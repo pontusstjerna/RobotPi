@@ -85,6 +85,7 @@ class RobotPi:
                     print(
                         f"Attempted {self.attempted_redocks} - will unfortunately shut down (send notification in the future)"
                     )
+                    subprocess.run(["sudo", "shutdown", "now"])
                     return
 
                 self.video.update()
