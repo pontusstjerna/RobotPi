@@ -69,5 +69,5 @@ class Calibration(CVModule):
         return {
             "power": self.calibration_power,
             "millimeters_per_second": self.millimeters_per_second,
-            "start_qr_width_pixels": ""
+            "seconds_per_millimenter": 1.0 / self.millimeters_per_second
         }

@@ -5,7 +5,7 @@ load_dotenv()
 import json
 import subprocess
 from mqtt_client import MqttClient
-from controller import Controller
+from controller import Controller, run_motors
 from datetime import datetime, timedelta
 from automation import Timer, redock
 from functools import partial
@@ -78,6 +78,11 @@ class RobotPi:
             self.qr_follower.deactivate()
         elif message == "calibrate":
             self.calibration.activate()
+        elif message == "forward_500":
+            calibration = self.calibration.get_calibration()
+            seconds = calibration.get("seconds_per_millimeter")
+            power = calibration.get("power")
+            run_motors(power, power, seconds * 500)
         else:
             self.controller.handle_message(message)
 
