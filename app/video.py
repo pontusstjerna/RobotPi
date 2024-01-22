@@ -50,6 +50,10 @@ class VideoProcessor:
             **output_params,
         )
 
+        if not self.writer:
+            print("Failed to start camera for unknown reason!")
+            return
+
         self.running = True
 
     def stop(self):

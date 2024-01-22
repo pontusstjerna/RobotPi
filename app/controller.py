@@ -1,4 +1,5 @@
 import config
+from time import sleep
 
 if not config.IS_DEBUG:
     import L298NHBridge
@@ -7,8 +8,13 @@ if not config.IS_DEBUG:
 from functools import partial
 
 
-def set_motors(left=0, right=0):
+def run_motors(left=0, right=0, for_seconds=0.0):
+    set_motors(left, right)
+    sleep(for_seconds)
+    set_motors(0, 0)
 
+
+def set_motors(left=0, right=0):
     # They are inverted...
     L298NHBridge.setMotorRight(left)
     L298NHBridge.setMotorLeft(right)
