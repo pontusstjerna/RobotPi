@@ -15,6 +15,7 @@ from status import get_status
 from time import time, sleep
 from computer_vision.qr_follower import QrFollower
 from computer_vision.voltage_display import VoltageDisplay
+from computer_vision.calibration import Calibration
 from automation import redock
 import config
 
@@ -35,9 +36,11 @@ class RobotPi:
         self.video = VideoProcessor()
         self.qr_follower = QrFollower()
         self.charge_controller = ChargeController()
+        self.calibration = Calibration()
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay(self.charge_controller))
+        self.video.add_cv_module(self.calibration)
 
     def on_message(self, message):
         self.last_message = datetime.now()
@@ -73,6 +76,8 @@ class RobotPi:
             self.qr_follower.activate()
         elif message == "dock_stop" or message == "follow_qr_stop":
             self.qr_follower.deactivate()
+        elif message == "calibrate":
+            self.calibration.activate()
         else:
             self.controller.handle_message(message)
 

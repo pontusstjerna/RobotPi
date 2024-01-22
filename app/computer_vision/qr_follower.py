@@ -5,11 +5,6 @@ import config
 
 from computer_vision.cv_module import CVModule
 
-
-def get_dist(a, b):
-    return isqrt(int(pow(b[0] - a[0], 2)) + int(pow(b[1] - a[1], 2)))
-
-
 max_diagonal_len = 450
 min_line_up_diagonal_len = 200
 max_line_up_diagonal_len = 250

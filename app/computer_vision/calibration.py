@@ -1,29 +1,32 @@
 from controller import run_motors
 from computer_vision.cv_module import CVModule
+from computer_vision import util
 import cv2
 
 
 QR_WIDTH_MM = 70
+START_DIST_MM = 460
 
 # PHASES
 START = "START"
-ROTATION = "ROTATION"
+DISTANCE = "DISTANCE"
 
 
 class Calibration(CVModule):
     calibration_power = 0.4
 
     phase = START
-    qr_readings = {START: []}
+    qr_readings = {DISTANCE: []}
 
     degrees_per_second = None
+    millimeters_per_second = None
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
         return
 
     def calibrate(self):
-        super().activate(True)
+        super().activate()
         self.degrees_per_second = None
 
     def update(self, img):
@@ -32,16 +35,39 @@ class Calibration(CVModule):
 
         if self.phase == START:
             self.phase_start(img)
+        elif self.phase == DISTANCE:
+            self.phase_distance(img)
 
         return
 
     def phase_start(self, img):
         box = self.detect_qr(img)
         if box is not None:
+            self.qr_readings[DISTANCE].append(box)
             run_motors(-self.calibration_power, -self.calibration_power, 1)
-            self.phase = 
+            if len(self.qr_readings[DISTANCE]) >= 2:
+                self.phase = DISTANCE
+
+    def phase_distance(self, img):
+        box = self.detect_qr(img)
+        if box is not None:
+            self.qr_readings[DISTANCE].append(box)
+            readings = self.qr_readings[DISTANCE]
+            focal_length = util.calc_focal_length(START_DIST_MM, QR_WIDTH_MM, util.get_width(readings[0]))
+
+            distances = [util.calc_dist(focal_length, QR_WIDTH_MM, util.get_width(box)) for box in readings]
+            self.millimeters_per_second = sum(distances) / len(distances)
+            self.phase = None
+            super().deactivate()
 
     def detect_qr(self, img):
         _, boxes = self.detector.detect(img)
         if boxes is not None:
             return boxes[0]
+        
+    def get_calibration(self):
+        return {
+            "power": self.calibration_power,
+            "millimeters_per_second": self.millimeters_per_second,
+            "start_qr_width_pixels": ""
+        }
