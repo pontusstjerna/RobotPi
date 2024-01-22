@@ -31,6 +31,11 @@ class VideoProcessor:
 
         # set up camera object
         self.cap = cv2.VideoCapture(0)
+
+        if not self.cap:
+            print("Failed to start camera for unknown reason!")
+            return
+
         W, H = 1920, 1080
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)

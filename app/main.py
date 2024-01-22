@@ -111,6 +111,7 @@ class RobotPi:
     def set_usb(self, on):
         if not on:
             sleep(5)
+
         subprocess.run(
             ["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "1" if on else "0"]
         )
