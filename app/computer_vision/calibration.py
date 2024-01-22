@@ -58,6 +58,8 @@ class Calibration(CVModule):
             distances = [util.calc_dist(focal_length, QR_WIDTH_MM, util.get_width(box)) for box in readings]
             self.millimeters_per_second = sum(distances) / len(distances)
             self.phase = None
+            print("Calibration complete: ")
+            print(self.get_calibration())
             super().deactivate()
 
     def detect_qr(self, img):

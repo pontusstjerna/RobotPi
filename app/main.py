@@ -45,7 +45,7 @@ class RobotPi:
     def on_message(self, message):
         self.last_message = datetime.now()
         if not self.is_running:
-            self.set_usb(on=True)
+#            self.set_usb(on=True)
             self.video.start()
             self.is_running = True
 
@@ -88,7 +88,7 @@ class RobotPi:
 
     def startup(self):
         self.mqtt_client.connect()
-        self.set_usb(on=False)
+#        self.set_usb(on=False)
         try:
             while True:
                 if self.attempted_redocks >= config.MAX_REDOCK_ATTEMPTS:
@@ -107,7 +107,7 @@ class RobotPi:
                     self.is_running = False
                     print("Timeout, stopping video stream.")
                     self.video.stop()
-                    self.set_usb(on=False)
+#                    self.set_usb(on=False)
 
                 self.check_redock()
 
@@ -127,7 +127,7 @@ class RobotPi:
         )
 
         if on:
-            sleep(10)
+            sleep(20)
 
     def check_redock(self):
         if (
