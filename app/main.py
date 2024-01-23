@@ -37,7 +37,9 @@ class RobotPi:
         self.qr_follower = QrFollower()
         self.charge_controller = ChargeController()
         self.calibration = Calibration()
-        self.redock_timer = Timer(timedelta(minutes=30), partial(redock, self.controller))
+        self.redock_timer = Timer(
+            timedelta(minutes=30), partial(redock, self.controller)
+        )
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay(self.charge_controller))
@@ -46,7 +48,7 @@ class RobotPi:
     def on_message(self, message):
         self.last_message = datetime.now()
         if not self.is_running:
-#            self.set_usb(on=True)
+            self.set_usb(on=True)
             self.video.start()
             self.is_running = True
 
@@ -90,7 +92,7 @@ class RobotPi:
     def run(self):
         print("Robotpi is now running!")
         self.mqtt_client.connect()
-#        self.set_usb(on=False)
+        self.set_usb(on=False)
         try:
             while True:
                 if self.attempted_redocks >= config.MAX_REDOCK_ATTEMPTS:
@@ -109,7 +111,7 @@ class RobotPi:
                     self.is_running = False
                     print("Timeout, stopping video stream.")
                     self.video.stop()
-#                    self.set_usb(on=False)
+                    self.set_usb(on=False)
 
                 self.redock_timer.update()
 
@@ -129,7 +131,7 @@ class RobotPi:
         )
 
         if on:
-            sleep(20)
+            sleep(5)
 
 
 print(f"Robotpi starting up with debug set to {config.IS_DEBUG}")

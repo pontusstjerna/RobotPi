@@ -20,10 +20,10 @@ class Calibration(CVModule):
 
     degrees_per_second = None
     millimeters_per_second = None
+    focal_length = None
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
-        return
 
     def calibrate(self):
         super().activate()
@@ -53,9 +53,11 @@ class Calibration(CVModule):
         if box is not None:
             self.qr_readings[DISTANCE].append(box)
             readings = self.qr_readings[DISTANCE]
-            focal_length = util.calc_focal_length(START_DIST_MM, QR_WIDTH_MM, util.get_width(readings[0]))
+            self.focal_length = util.calc_focal_length(
+                START_DIST_MM, QR_WIDTH_MM, util.get_width(readings[0])
+            )
 
-            distances = [util.calc_dist(focal_length, QR_WIDTH_MM, util.get_width(box)) for box in readings]
+            distances = [self.get_millimeters_to_qr(box) for box in readings]
             self.millimeters_per_second = sum(distances) / len(distances)
             self.phase = None
             print("Calibration complete: ")
@@ -66,10 +68,13 @@ class Calibration(CVModule):
         _, boxes = self.detector.detect(img)
         if boxes is not None:
             return boxes[0]
-        
+
+    def get_millimeters_to_qr(self, box):
+        return util.calc_dist(self.focal_length, QR_WIDTH_MM, util.get_width(box))
+
     def get_calibration(self):
         return {
             "power": self.calibration_power,
             "millimeters_per_second": self.millimeters_per_second,
-            "seconds_per_millimenter": 1.0 / self.millimeters_per_second
+            "seconds_per_millimenter": 1.0 / self.millimeters_per_second,
         }
