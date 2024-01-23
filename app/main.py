@@ -86,6 +86,11 @@ class RobotPi:
             seconds = calibration.get("seconds_per_millimeter")
             power = calibration.get("power")
             run_motors(power, power, seconds * 500)
+        elif message == "turn_right_90":
+            calibration = self.calibration.get_calibration()
+            seconds = calibration.get("seconds_per_degree_right") * 90
+            power = calibration.get("power")
+            run_motors(power, -power, seconds)
         else:
             self.controller.handle_message(message)
 
