@@ -30,11 +30,9 @@ class VideoProcessor:
         print("Initiating camera stream...")
 
         # set up camera object
-        self.cap = cv2.VideoCapture(0)
-
         if not self.cap:
-            print("Failed to start camera for unknown reason!")
-            return
+            print("Connecting to camera...")
+            self.cap = cv2.VideoCapture(0)
 
         W, H = 1920, 1080
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
@@ -49,10 +47,6 @@ class VideoProcessor:
             logging=False,
             **output_params,
         )
-
-        if not self.writer:
-            print("Failed to start camera for unknown reason!")
-            return
 
         self.running = True
 
