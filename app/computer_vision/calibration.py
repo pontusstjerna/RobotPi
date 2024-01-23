@@ -53,7 +53,7 @@ class Calibration(CVModule):
         if box is not None:
             self.qr_readings[DISTANCE].append(box)
             run_motors(-self.calibration_power, -self.calibration_power, 1)
-            if len(self.qr_readings[DISTANCE]) >= 2:
+            if len(self.qr_readings[DISTANCE]) > 0:
                 self.phase = DISTANCE
 
     def phase_distance(self, img):
@@ -65,14 +65,14 @@ class Calibration(CVModule):
                 START_DIST_MM, QR_WIDTH_MM, util.get_width(readings[0])
             )
 
-            distances = [self.get_millimeters_to_qr(box) for box in readings]
-            self.millimeters_per_second = sum(distances) / len(distances)
+            distance = self.get_millimeters_to_qr(box)
+            self.millimeters_per_second = distance
             self.phase = ROTATION
 
     def phase_rotation(self, img):
         box = self.detect_qr(img)
         if box is not None:
-            if len(self.qr_readings[ROTATION] == 0):
+            if len(self.qr_readings[ROTATION]) == 0:
                 self.qr_readings[ROTATION].append(box)
                 run_motors(self.calibration_power, -self.calibration_power, 0.5)
             else:
