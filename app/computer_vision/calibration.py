@@ -83,7 +83,7 @@ class Calibration(CVModule):
                 width_in_pixels = util.get_width(self.qr_readings[ROTATION][0])
 
                 millimeter_per_pixel = QR_WIDTH_MM / width_in_pixels
-                moved_horizontal_pixels = second_box_corner[3] - first_box_corner[3]
+                moved_horizontal_pixels = second_box_corner[0] - first_box_corner[0]
 
                 moved_horizontal_millimeters = moved_horizontal_pixels * millimeter_per_pixel
 
