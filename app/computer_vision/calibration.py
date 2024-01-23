@@ -65,7 +65,7 @@ class Calibration(CVModule):
                 START_DIST_MM, QR_WIDTH_MM, util.get_width(readings[0])
             )
 
-            distance = self.get_millimeters_to_qr(box)
+            distance = self.get_millimeters_to_qr(box) - START_DIST_MM
             self.millimeters_per_second = distance
             self.phase = ROTATION
 
@@ -80,16 +80,22 @@ class Calibration(CVModule):
                 millimeters_to_qr = self.get_millimeters_to_qr(box)
                 first_box_corner = self.qr_readings[ROTATION][0][0]
                 second_box_corner = box[0]
-                width_in_pixels = util.get_width(box)
+                width_in_pixels = util.get_width(self.qr_readings[ROTATION][0])
 
                 millimeter_per_pixel = QR_WIDTH_MM / width_in_pixels
-                moved_horizontal_pixels = second_box_corner[0] - first_box_corner[0]
+                moved_horizontal_pixels = second_box_corner[3] - first_box_corner[3]
 
                 moved_horizontal_millimeters = moved_horizontal_pixels * millimeter_per_pixel
 
                 moved_degrees = math.atan2(moved_horizontal_millimeters, millimeters_to_qr)
                 self.degrees_per_second_right = moved_degrees * 2
                 self.phase = None
+
+                print(f"Millimeters to qr before turn: {millimeters_to_qr}")
+                print(f"width in pixels: {width_in_pixels}")
+                print(f"Moved horiz pixels: {moved_horizontal_pixels}")
+                print(f"Moved horiz millis: {moved_horizontal_millimeters}")
+                print(f"Moved degrees: {moved_degrees}")
 
                 
 
