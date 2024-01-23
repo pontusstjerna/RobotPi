@@ -5,7 +5,7 @@ import cv2
 import math
 
 
-QR_WIDTH_MM = 70
+QR_WIDTH_MM = 63
 START_DIST_MM = 460
 
 # PHASES
@@ -78,8 +78,8 @@ class Calibration(CVModule):
             else:
                 self.qr_readings[ROTATION].append(box)
                 millimeters_to_qr = self.get_millimeters_to_qr(box)
-                first_box_corner = self.qr_readings[ROTATION][0][0]
-                second_box_corner = box[0]
+                first_box_corner = self.qr_readings[ROTATION][0][3]
+                second_box_corner = box[3]
                 width_in_pixels = util.get_width(self.qr_readings[ROTATION][0])
 
                 millimeter_per_pixel = QR_WIDTH_MM / width_in_pixels
@@ -93,6 +93,8 @@ class Calibration(CVModule):
 
                 print(f"Millimeters to qr before turn: {millimeters_to_qr}")
                 print(f"width in pixels: {width_in_pixels}")
+                print(f"Top left corner first reading: {first_box_corner}")
+                print(f"Top left corner second reading: {second_box_corner}")
                 print(f"Moved horiz pixels: {moved_horizontal_pixels}")
                 print(f"Moved horiz millis: {moved_horizontal_millimeters}")
                 print(f"Moved degrees: {moved_degrees}")
