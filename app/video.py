@@ -24,6 +24,7 @@ def resize_img(img, scale=0.3):
 class VideoProcessor:
     running = False
     writer = None
+    cap = None
     cv_modules: [CVModule] = []
 
     def start(self):
