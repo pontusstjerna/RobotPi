@@ -37,6 +37,7 @@ class RobotPi:
         self.qr_follower = QrFollower()
         self.charge_controller = ChargeController()
         self.calibration = Calibration()
+        self.redock_timer = Timer(timedelta(minutes=30), partial(redock, self.controller))
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay(self.charge_controller))
@@ -86,7 +87,8 @@ class RobotPi:
         else:
             self.controller.handle_message(message)
 
-    def startup(self):
+    def run(self):
+        print("Robotpi is now running!")
         self.mqtt_client.connect()
 #        self.set_usb(on=False)
         try:
@@ -109,7 +111,7 @@ class RobotPi:
                     self.video.stop()
 #                    self.set_usb(on=False)
 
-                self.check_redock()
+                self.redock_timer.update()
 
         except KeyboardInterrupt:
             print("Exiting...")
@@ -129,34 +131,6 @@ class RobotPi:
         if on:
             sleep(20)
 
-    def check_redock(self):
-        if (
-            not config.IS_DEBUG
-            and not self.is_running
-            and not self.charge_controller.is_charging()
-        ):
-            voltage = get_voltage()
-
-            if voltage < config.REDOCK_VOLTAGE:
-                if voltage < 5:
-                    print(
-                        f"Voltage unreasonably low ({round(voltage, 2)}v) - will not redock"
-                    )
-                else:
-                    print(
-                        f"Voltage below {config.REDOCK_VOLTAGE}v ({round(voltage, 2)}v), will redock"
-                    )
-                    redock(self.controller)
-                    for _ in range(200):
-                        self.charge_controller.update()
-                        sleep(0.2)
-                    self.attempted_redocks += 1
-            else:
-                print(f"Voltage: {round(get_voltage(), 3)}v, not charging")
-        elif not config.IS_DEBUG and not self.is_running:
-            self.attempted_redocks = 0
-            # print(f"Voltage: {round(get_voltage(), 3)}v - is charging")
-
 
 print(f"Robotpi starting up with debug set to {config.IS_DEBUG}")
-RobotPi().startup()
+RobotPi().run()
