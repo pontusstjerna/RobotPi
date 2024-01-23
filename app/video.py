@@ -34,11 +34,13 @@ class VideoProcessor:
             print("Connecting to camera...")
             self.cap = cv2.VideoCapture(0)
 
-        W, H = 1920, 1080
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
-        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
+            W, H = 1920, 1080
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
+            self.cap.set(
+                cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G")
+            )
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
 
         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
         self.writer = WriteGear(
