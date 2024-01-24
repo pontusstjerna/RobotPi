@@ -10,6 +10,7 @@ from computer_vision.cv_module import CVModule
 PWR = 0.3
 MAX_DIAGONAL_LEN = 200
 LINE_UP_THRESHOLD_DIAGONAL_LENGTH = 150
+MAX_CENTER_POINT_DIST = 10
 
 # PHASES
 SEARCHING = "SEARCHING"
@@ -22,6 +23,7 @@ ARRIVED = "ARRIVED"
 class QrFollower(CVModule):
     frames_since_move = 0
     phase = SEARCHING
+    last_center = None
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
@@ -162,5 +164,18 @@ class QrFollower(CVModule):
 
     def detect_qr(self, img):
         _, boxes = self.detector.detect(img)
+
         if boxes is not None:
-            return boxes[0]
+            box = boxes[0]
+            center = util.calc_center_point(box)
+            if not self.last_center:
+                self.last_center = center
+                return None
+            else:
+                dist = util.get_dist(center, self.last_center)
+                if dist < MAX_CENTER_POINT_DIST:
+                    self.last_center = None
+                    return box
+                else:
+                    self.last_center = center
+                    return None
