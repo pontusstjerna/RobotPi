@@ -33,7 +33,7 @@ class VideoProcessor:
         # set up camera object
         if not self.cap:
             print("Connecting to camera...")
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(-1)
 
             W, H = 1920, 1080
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)

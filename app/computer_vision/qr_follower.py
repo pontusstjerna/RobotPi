@@ -26,6 +26,10 @@ class QrFollower(CVModule):
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
 
+    def activate(self):
+        super().activate()
+        self.phase = SEARCHING
+
     def update(self, img):
         if not self.active:
             return
@@ -70,7 +74,7 @@ class QrFollower(CVModule):
 
     def phase_searching(self, img):
         box = self.detect_qr(img)
-        if box:
+        if box is not None:
             self.phase = CENTRALIZE
         elif self.frames_since_move > 5:
             self.frames_since_move = 0

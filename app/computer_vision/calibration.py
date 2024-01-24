@@ -120,9 +120,9 @@ class Calibration(CVModule):
         return {
             "power": self.calibration_power,
             "millimeters_per_second": self.millimeters_per_second,
-            "seconds_per_millimenter": 1.0 / self.millimeters_per_second,
+            "seconds_per_millimenter": 1.0 / max(0.00001, self.millimeters_per_second),
             "degrees_per_second_right": self.degrees_per_second_right,
-            "seconds_per_degree_right": 1.0 / self.degrees_per_second_right,
+            "seconds_per_degree_right": 1.0 / max(0.0001, self.degrees_per_second_right),
             "initial_diag_length": self.initial_diag_length,
             "initial_pixel_width": self.initial_pixel_width,
         }
