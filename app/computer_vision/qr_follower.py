@@ -3,41 +3,28 @@ import cv2
 from controller import run_motors
 import config
 from computer_vision.util import get_dist, get_width
+from computer_vision import util
 
 from computer_vision.cv_module import CVModule
 
-max_diagonal_len = 450
-min_line_up_diagonal_len = 200
-max_line_up_diagonal_len = 250
-min_diagonal_len_delta = 50
-turn_factor_threshold = 0.1
-pwr = 0.3
-
-# BEARING
-RIGHT = "RIGHT"
-LEFT = "LEFT"
-IN_FRONT = "IN_FRONT"
+PWR = 0.3
+MAX_DIAGONAL_LEN = 200
+LINE_UP_THRESHOLD_DIAGONAL_LENGTH = 150
 
 # PHASES
 SEARCHING = "SEARCHING"
+CENTRALIZE = "CENTRALIZE"
 FOLLOWING = "FOLLOWING"
 LINING_UP = "LINING_UP"
 ARRIVED = "ARRIVED"
 
 
 class QrFollower(CVModule):
-    last_center_point = (0, 0)
     frames_since_move = 0
-    last_seen = RIGHT
     phase = SEARCHING
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
-
-    def activate(self):
-        # Search for QR, starting to the right
-        self.last_seen = RIGHT
-        super().activate()
 
     def update(self, img):
         if not self.active:
@@ -46,102 +33,68 @@ class QrFollower(CVModule):
         status = f"Phase: {self.phase}"
         if self.phase == SEARCHING:
             self.phase_searching(img)
+        elif self.phase == CENTRALIZE:
+            self.phase_lining_up(img)
+        elif self.phase == FOLLOWING:
+            self.phase_follow()
         elif self.phase == LINING_UP:
             self.phase_lining_up(img)
+        else:
+            print("Following complete!")
+            super().deactivate()
 
-        # if box is None and self.phase != ARRIVED and self.phase != LINING_UP:
-        #     self.phase = SEARCHING
-        # elif boxes is not None:
-        #     box = boxes[0]
-        #     diagonal_length = get_dist(box[0], box[2])
-        #     status += f", DIAG: {diagonal_length}"
-        #     if diagonal_length >= max_diagonal_len:
-        #         self.phase = ARRIVED
-        #     elif (
-        #         self.phase == FOLLOWING
-        #         and diagonal_length >= min_line_up_diagonal_len
-        #         and diagonal_length <= max_diagonal_len
-        #     ):
-        #         self.phase = LINING_UP
-        #     elif self.phase == SEARCHING:
-        #         self.phase = FOLLOWING
-
-        # self.act_on_phase(img, None if boxes is None else boxes[0])
         self.print_status(img, status)
 
-    def act_on_phase(self, img, box):
-        if self.phase == SEARCHING:
-            self.find_qr(img)
-        elif self.phase == FOLLOWING:
-            diagonal_length = get_dist(box[0], box[2])
-            right_side_len = get_dist(box[0], box[1])
-            left_side_len = get_dist(box[2], box[3])
-            top_side_len = get_dist(box[3], box[0])
+    def phase_lining_up(self, img):
+        box = self.detect_qr(img)
+        if box is not None:
+            if util.get_diagonal_length(box) > MAX_DIAGONAL_LEN:
+                print("Done!")
+                self.phase = None
+            else:
+                right_side_len = get_dist(box[0], box[1])
+                left_side_len = get_dist(box[2], box[3])
 
-            center_point = (
-                int(box[0][0]) - int(top_side_len / 2),
-                int(box[0][1]) + int(top_side_len / 2),
-            )
-
-            has_moved_not_so_much = (
-                get_dist(self.last_center_point, center_point) < min_diagonal_len_delta
-            )
-
-            # Remove misreadings
-            if has_moved_not_so_much:
-                self.print_qr_graphics(img, box, center_point)
-                self.follow_qr(img, center_point, diagonal_length)
-
-            self.last_center_point = center_point
-        elif self.phase == LINING_UP:
-            self.line_up(img, box)
-
-    def follow_qr(self, img, center_point, diagonal_len):
-        width = img.shape[1]
-        turn_factor = (0 + 2 * center_point[0] / width) - 1
-        arrived = diagonal_len >= max_diagonal_len
-
-        if turn_factor < -turn_factor_threshold and not arrived:
-            self.last_seen = RIGHT
-            self.set_motors(-pwr, pwr, img)
-        elif turn_factor > turn_factor_threshold and not arrived:
-            self.last_seen = LEFT
-            self.set_motors(pwr, -pwr, img)
-        elif not arrived:
-            self.last_seen = IN_FRONT
-            self.set_motors(pwr * 0.7, pwr * 0.7, img)
-        else:
-            self.last_seen = None
-            self.set_motors(0, 0, img)
-
-    def find_qr(self, img):
-        if self.last_seen == RIGHT:
-            self.set_motors(pwr, -pwr, img)
-        elif self.last_seen == LEFT:
-            self.set_motors(-pwr, pwr, img)
-        elif self.last_seen == IN_FRONT:
-            self.set_motors(-pwr * 0.7, -pwr * 0.7, img)
-
-    def lineup(self, img, box):
-        self.set_motors(0, 0, img)
+                if abs(right_side_len - left_side_len) < 4:
+                    run_motors(PWR, PWR, 0.3)
+                elif right_side_len > left_side_len:  # go left
+                    run_motors(PWR, -PWR, 0.5)
+                    run_motors(-PWR, -PWR, 0.5)
+                    run_motors(-PWR, PWR, 0.5)
+                    self.phase = SEARCHING
+                else:  # go right
+                    run_motors(-PWR, PWR, 0.5)
+                    run_motors(-PWR, -PWR, 0.5)
+                    run_motors(PWR, -PWR, 0.5)
+                    self.phase = SEARCHING
 
     def phase_searching(self, img):
         box = self.detect_qr(img)
         if box:
-            self.last_center_point = self.calc_center_point(box)
-            self.phase = LINING_UP
+            self.phase = CENTRALIZE
         elif self.frames_since_move > 5:
             self.frames_since_move = 0
-            run_motors(pwr, -pwr, 0.5)
+            run_motors(PWR, -PWR, 0.5)
         else:
             self.frames_since_move += 1
 
-    def calc_center_point(self, box):
-        width = get_width(box)
-        self.last_center_point = (
-            int(box[0][0]) - int(width / 2),
-            int(box[0][1]) + int(width / 2),
-        )
+    def phase_centralize(self, img):
+        box = self.detect_qr(img)
+        if box is not None:
+            turn_factor = self.calc_turn_factor(img, util.calc_center_point(box))
+            if turn_factor > 0.2:
+                run_motors(-PWR, PWR, 0.2)
+            elif turn_factor < -0.2:
+                run_motors(PWR, -PWR, 0.2)
+            else:
+                if util.get_diagonal_length(box) < LINE_UP_THRESHOLD_DIAGONAL_LENGTH:
+                    self.phase = FOLLOWING
+                else:
+                    self.phase = LINING_UP
+
+    def phase_follow(self):
+        run_motors(PWR, PWR, 0.3)
+        self.phase = CENTRALIZE
 
     def print_qr_graphics(self, img, box, center_point):
         # Right side
@@ -187,6 +140,10 @@ class QrFollower(CVModule):
 
         if not config.IS_DEBUG:
             set_motors(left, right)
+
+    def calc_turn_factor(self, img, center_point):
+        width = img.shape[1]
+        return (2 * center_point[0] / width) - 1
 
     def print_status(self, img, status):
         cv2.putText(

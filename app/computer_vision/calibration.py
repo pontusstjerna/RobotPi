@@ -23,6 +23,8 @@ class Calibration(CVModule):
     degrees_per_second_right = None
     millimeters_per_second = None
     focal_length = None
+    initial_pixel_width = None
+    initial_diag_length = None
 
     def __init__(self):
         self.detector = cv2.QRCodeDetector()
@@ -52,6 +54,8 @@ class Calibration(CVModule):
         box = self.detect_qr(img)
         if box is not None:
             self.qr_readings[DISTANCE].append(box)
+            self.initial_pixel_width = util.get_width(box)
+            self.initial_diag_length = util.get_diagonal_length(box)
             run_motors(-self.calibration_power, -self.calibration_power, 1)
             if len(self.qr_readings[DISTANCE]) > 0:
                 self.phase = DISTANCE
@@ -78,28 +82,31 @@ class Calibration(CVModule):
             else:
                 self.qr_readings[ROTATION].append(box)
                 millimeters_to_qr = self.get_millimeters_to_qr(box)
-                first_box_corner = self.qr_readings[ROTATION][0][3]
-                second_box_corner = box[3]
+                first_box_center = util.calc_center_point(self.qr_readings[ROTATION][0])
+                second_box_center = util.calc_center_point(box)
                 width_in_pixels = util.get_width(self.qr_readings[ROTATION][0])
 
                 millimeter_per_pixel = QR_WIDTH_MM / width_in_pixels
-                moved_horizontal_pixels = second_box_corner[0] - first_box_corner[0]
+                moved_horizontal_pixels = second_box_center[0] - first_box_center[0]
 
-                moved_horizontal_millimeters = moved_horizontal_pixels * millimeter_per_pixel
+                moved_horizontal_millimeters = (
+                    moved_horizontal_pixels * millimeter_per_pixel
+                )
 
-                moved_degrees = math.atan2(moved_horizontal_millimeters, millimeters_to_qr)
+                moved_degrees = math.atan2(
+                    moved_horizontal_millimeters, millimeters_to_qr
+                )
                 self.degrees_per_second_right = moved_degrees * 2
                 self.phase = None
+                run_motors(-self.calibration_power, self.calibration_power, 0.5)
 
                 print(f"Millimeters to qr before turn: {millimeters_to_qr}")
                 print(f"width in pixels: {width_in_pixels}")
-                print(f"Top left corner first reading: {first_box_corner}")
-                print(f"Top left corner second reading: {second_box_corner}")
+                print(f"Center first reading: {first_box_center}")
+                print(f"Center second reading: {second_box_center}")
                 print(f"Moved horiz pixels: {moved_horizontal_pixels}")
                 print(f"Moved horiz millis: {moved_horizontal_millimeters}")
                 print(f"Moved degrees: {moved_degrees}")
-
-                
 
     def detect_qr(self, img):
         _, boxes = self.detector.detect(img)
@@ -115,5 +122,7 @@ class Calibration(CVModule):
             "millimeters_per_second": self.millimeters_per_second,
             "seconds_per_millimenter": 1.0 / self.millimeters_per_second,
             "degrees_per_second_right": self.degrees_per_second_right,
-            "seconds_per_degree_right": 1.0 / self.degrees_per_second_right
+            "seconds_per_degree_right": 1.0 / self.degrees_per_second_right,
+            "initial_diag_length": self.initial_diag_length,
+            "initial_pixel_width": self.initial_pixel_width,
         }

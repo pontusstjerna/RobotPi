@@ -35,3 +35,15 @@ def get_dist(a, b):
 
 def get_width(img_box):
     return get_dist(img_box[1], img_box[2])
+
+
+def calc_center_point(img_box):
+    width = get_width(img_box)
+    return (
+        int(img_box[0][0]) - int(width / 2),
+        int(img_box[0][1]) + int(width / 2),
+    )
+
+
+def get_diagonal_length(img_box):
+    return get_dist(img_box[0], img_box[2])
