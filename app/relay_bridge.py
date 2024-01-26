@@ -4,7 +4,7 @@ import RPi.GPIO as io
 io.setmode(io.BCM)
 
 
-pin_number = 16
+pin_number = 26
 
 io.setup(pin_number, io.OUT)
 
@@ -13,9 +13,9 @@ io.output(pin_number, False)
 
 def set_state(state):
     if state == "close":
-        io.output(pin_number, False)
-    elif state == "open":
         io.output(pin_number, True)
+    elif state == "open":
+        io.output(pin_number, False)
 
 
 def get_state():

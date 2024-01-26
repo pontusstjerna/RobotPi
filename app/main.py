@@ -7,7 +7,7 @@ import subprocess
 from mqtt_client import MqttClient
 from controller import Controller, run_motors
 from datetime import datetime, timedelta
-from automation import Timer, redock
+from automation import Timer, reload_charge
 from functools import partial
 from video import VideoProcessor
 from charge_controller import ChargeController
@@ -16,11 +16,8 @@ from time import time, sleep
 from computer_vision.qr_follower import QrFollower
 from computer_vision.voltage_display import VoltageDisplay
 from computer_vision.calibration import Calibration
-from automation import redock
+from automation import reload_charge
 import config
-
-if not config.IS_DEBUG:
-    from INA260_bridge import get_voltage
 
 
 class RobotPi:
@@ -37,9 +34,7 @@ class RobotPi:
         self.qr_follower = QrFollower()
         self.charge_controller = ChargeController()
         self.calibration = Calibration()
-        self.redock_timer = Timer(
-            timedelta(minutes=30), partial(redock, self.controller)
-        )
+        self.reload_timer = Timer(timedelta(minutes=30), partial(reload_charge))
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(VoltageDisplay(self.charge_controller))
@@ -100,13 +95,6 @@ class RobotPi:
         self.set_usb(on=False)
         try:
             while True:
-                if self.attempted_redocks >= config.MAX_REDOCK_ATTEMPTS:
-                    print(
-                        f"Attempted {self.attempted_redocks} - will unfortunately shut down (send notification in the future)"
-                    )
-                    subprocess.run(["sudo", "shutdown", "now"])
-                    return
-
                 self.video.update()
                 self.charge_controller.update()
 
@@ -118,7 +106,7 @@ class RobotPi:
                     self.video.stop()
                     self.set_usb(on=False)
 
-                self.redock_timer.update()
+                self.reload_timer.update()
 
         except KeyboardInterrupt:
             print("Exiting...")
@@ -129,14 +117,14 @@ class RobotPi:
 
     def set_usb(self, on):
         if not on:
-            sleep(5)
+            sleep(2)
 
         subprocess.run(
             ["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "1" if on else "0"]
         )
 
         if on:
-            sleep(5)
+            sleep(2)
 
 
 print(f"Robotpi starting up with debug set to {config.IS_DEBUG}")

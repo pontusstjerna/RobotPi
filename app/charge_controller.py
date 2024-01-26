@@ -31,7 +31,6 @@ class ChargeController:
         return self.slope
 
     def calc_charge_slope(self):
-
         if len(self.latest_voltage_readings) == 0:
             return 0
 
