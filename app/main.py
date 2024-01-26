@@ -37,6 +37,7 @@ class RobotPi:
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(self.calibration)
+        self.video.add_cv_module(VoltageDisplay())
 
     def on_message(self, message):
         self.last_message = datetime.now()
