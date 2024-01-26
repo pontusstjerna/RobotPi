@@ -22,7 +22,7 @@ def is_charging_connected():
     return io.input(charge_read_pin) == 1
 
 def is_charging_enabled():
-    return io.input(relay_switch_pin)
+    return io.input(relay_switch_pin) == 1
 
 def exit():
     io.cleanup()
