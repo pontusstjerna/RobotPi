@@ -1,58 +1,28 @@
-import config
+import RPi.GPIO as io
 
-if not config.IS_DEBUG:
-    from INA260_bridge import get_voltage
-
-max_readings = 20
-min_charge_slope = 0.1 / 10000
-skip_updates = 8
+# Set mode to GPIO numbers (not PIN numbers)
+io.setmode(io.BCM)
 
 
-class ChargeController:
-    latest_voltage_readings = []
-    updates_since_last_read = 0
-    charging = False
-    slope = 0
+charge_read_pin = 6
+relay_switch_pin = 26
 
-    def update(self):
-        if self.updates_since_last_read < skip_updates:
-            self.updates_since_last_read += 1
-            return
-        else:
-            self.updates_since_last_read = 0
+io.setup(relay_switch_pin, io.OUT)
+io.setup(charge_read_pin, io.IN)
 
-        if len(self.latest_voltage_readings) >= max_readings:
-            self.latest_voltage_readings.pop(0)
+io.output(relay_switch_pin, False)
 
-        self.latest_voltage_readings.append(get_voltage())
-        self.slope = self.calc_charge_slope()
+def enable_charge():
+    io.output(relay_switch_pin, io.HIGH)
 
-    def get_charge_slope(self):
-        return self.slope
+def disable_charge():
+    io.output(relay_switch_pin, io.LOW)
 
-    def calc_charge_slope(self):
-        if len(self.latest_voltage_readings) == 0:
-            return 0
+def is_charging_connected():
+    return io.input(charge_read_pin) == 1
 
-        # using a formula to calculate approx. slope, see: https://www.varsitytutors.com/hotmath/hotmath_help/topics/line-of-best-fit
-        xs = range(len(self.latest_voltage_readings))
-        ys = self.latest_voltage_readings
+def is_charging_enabled():
+    return io.input(relay_switch_pin)
 
-        avg_xs = sum(xs) / len(xs)
-        avg_ys = sum(ys) / len(ys)
-
-        deviation_xs = [x - avg_xs for x in xs]
-        deviation_ys = [y - avg_ys for y in ys]
-
-        numerator = sum(
-            [deviation_xs[i] * deviation_ys[i] for i in range(len(deviation_xs))]
-        )
-        denomerator = sum([pow(deviation_x, 2) for deviation_x in deviation_xs])
-
-        if denomerator == 0:
-            return 1
-
-        return numerator / denomerator
-
-    def is_charging(self):
-        return self.slope > min_charge_slope
+def exit():
+    io.cleanup()

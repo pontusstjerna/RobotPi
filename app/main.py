@@ -10,13 +10,13 @@ from datetime import datetime, timedelta
 from automation import Timer, reload_charge
 from functools import partial
 from video import VideoProcessor
-from charge_controller import ChargeController
 from status import get_status
 from time import time, sleep
 from computer_vision.qr_follower import QrFollower
 from computer_vision.voltage_display import VoltageDisplay
 from computer_vision.calibration import Calibration
 from automation import reload_charge
+import charge_controller
 import config
 
 
@@ -32,12 +32,10 @@ class RobotPi:
         self.controller = Controller()
         self.video = VideoProcessor()
         self.qr_follower = QrFollower()
-        self.charge_controller = ChargeController()
         self.calibration = Calibration()
         self.reload_timer = Timer(timedelta(minutes=30), partial(reload_charge))
 
         self.video.add_cv_module(self.qr_follower)
-        self.video.add_cv_module(VoltageDisplay(self.charge_controller))
         self.video.add_cv_module(self.calibration)
 
     def on_message(self, message):
@@ -46,6 +44,7 @@ class RobotPi:
             self.set_usb(on=True)
             self.video.start()
             self.is_running = True
+            charge_controller.disable_charge()
 
             if config.FOLLOW_QR_DIRECTLY:
                 self.qr_follower.activate()
@@ -70,6 +69,10 @@ class RobotPi:
                 self.mqtt_client.publish_message(
                     "status", message=json.dumps(get_status(self.controller))
                 )
+        elif message == "enable_charging":
+            charge_controller.enable_charge()
+        elif message == "disable_charging":
+            charge_controller.disable_charge()
         elif message == "dock_start" or message == "follow_qr_start":
             self.qr_follower.activate()
         elif message == "dock_stop" or message == "follow_qr_stop":
@@ -96,15 +99,15 @@ class RobotPi:
         try:
             while True:
                 self.video.update()
-                self.charge_controller.update()
 
                 if self.is_running and datetime.now() - self.last_message > timedelta(
                     seconds=config.IDLE_TIMEOUT_S
                 ):
                     self.is_running = False
-                    print("Timeout, stopping video stream.")
+                    print("Timeout, stopping video stream and starting charge.")
                     self.video.stop()
                     self.set_usb(on=False)
+                    charge_controller.enable_charge()
 
                 self.reload_timer.update()
 
@@ -114,6 +117,7 @@ class RobotPi:
         self.video.stop()
         self.mqtt_client.disconnect()
         self.controller.exit()
+        charge_controller.exit()
 
     def set_usb(self, on):
         if not on:
