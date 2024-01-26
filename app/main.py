@@ -44,7 +44,6 @@ class RobotPi:
             self.set_usb(on=True)
             self.video.start()
             self.is_running = True
-            charge_controller.disable_charge()
 
             if config.FOLLOW_QR_DIRECTLY:
                 self.qr_follower.activate()

@@ -4,7 +4,7 @@ import config
 
 if not config.IS_DEBUG:
     from INA260_bridge import get_current, get_voltage
-    import app.charge_controller as charge_controller
+    import charge_controller
 
 
 class VoltageDisplay(CVModule):
@@ -18,7 +18,7 @@ class VoltageDisplay(CVModule):
             is_charging = charge_controller.is_charging_connected()
             cv2.putText(
                 img,
-                f"Voltage: {round(get_voltage(), 2)}v, charging {'enabled.' if charge_controller.is_charging_enabled else 'disabled.'} {' - CHARGING CONNECTED' if is_charging else ''}"
+                f"Voltage: {round(get_voltage(), 2)}v, charging {'enabled.' if charge_controller.is_charging_enabled() else 'disabled.'} {' - CHARGING CONNECTED' if is_charging else ''}"
                 (0, height - 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,

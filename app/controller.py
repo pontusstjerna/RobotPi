@@ -4,6 +4,7 @@ from time import sleep
 if not config.IS_DEBUG:
     import L298NHBridge
     import servo_controller
+    import charge_controller
 
 from functools import partial
 
@@ -52,6 +53,9 @@ class Controller:
             "tilt_camera_up": servo_controller.increase_angle,
             "tilt_camera_down": servo_controller.decrease_angle,
         }
+
+        if message == "backward" and charge_controller.is_charging_enabled():
+            charge_controller.disable_charge()
 
         command = controls.get(message)
         if command:
