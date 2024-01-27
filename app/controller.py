@@ -54,7 +54,7 @@ class Controller:
             "tilt_camera_down": servo_controller.decrease_angle,
         }
 
-        if message == "backward" and charge_controller.is_charging_enabled():
+        if message == "backward" or message == "reverse" and charge_controller.is_charging_enabled():
             charge_controller.disable_charge()
 
         command = controls.get(message)

@@ -18,7 +18,7 @@ class VoltageDisplay(CVModule):
             is_charging = charge_controller.is_charging_connected()
             cv2.putText(
                 img,
-                f"Voltage: {round(get_voltage(), 2)}v, charging {'enabled.' if charge_controller.is_charging_enabled() else 'disabled.'} {' - CHARGING CONNECTED' if is_charging else ''}",
+                f"Voltage: {round(get_voltage(), 2)}v, charging {'enabled.' if charge_controller.is_charging_enabled() else 'disabled.'}",
                 (0, height - 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
@@ -27,7 +27,7 @@ class VoltageDisplay(CVModule):
             )
             cv2.putText(
                 img,
-                f"Current: {round(get_current(), 2)}mA",
+                f"Current: {round(get_current(), 2)}mA{' - CHARGER CONNECTED' if is_charging else ''}",
                 (0, height - 20),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
