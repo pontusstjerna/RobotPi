@@ -13,16 +13,16 @@ io.setup(charge_read_pin, io.IN)
 io.output(relay_switch_pin, False)
 
 def enable_charge():
-    io.output(relay_switch_pin, io.HIGH)
+    io.output(relay_switch_pin, io.LOW)
 
 def disable_charge():
-    io.output(relay_switch_pin, io.LOW)
+    io.output(relay_switch_pin, io.HIGH)
 
 def is_charging_connected():
     return io.input(charge_read_pin) == 1
 
 def is_charging_enabled():
-    return io.input(relay_switch_pin) == 1
+    return io.input(relay_switch_pin) == 0
 
 def exit():
     io.cleanup()
