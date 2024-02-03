@@ -44,12 +44,15 @@ class VideoProcessor:
             self.cap.set(cv2.CAP_PROP_FPS, 30)
 
         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
-        self.writer = WriteGear(
-            output=f"{os.environ.get('VIDEO_STREAM_HOST')}/video_stream/robotpi",
-            compression_mode=True,
-            logging=False,
-            **output_params,
-        )
+        if not self.writer:
+            output = f"{os.environ.get('VIDEO_STREAM_HOST')}/video_stream/robotpi"
+            print(f"Creating video writer and streaming to {output}")
+            self.writer = WriteGear(
+                output=output,
+                compression_mode=True,
+                logging=False,
+                **output_params,
+            )
 
         self.running = True
 
@@ -58,6 +61,10 @@ class VideoProcessor:
         if self.writer:
             self.writer.close()
             self.writer = None
+
+        if self.cap:
+            self.cap.release()
+            self.cap = None
 
     def update(self):
         if not self.running:
