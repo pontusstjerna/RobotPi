@@ -57,6 +57,7 @@ class VideoProcessor:
         self.running = False
         if self.writer:
             self.writer.close()
+            self.writer = None
 
     def update(self):
         if not self.running:
