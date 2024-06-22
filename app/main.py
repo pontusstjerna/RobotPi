@@ -3,11 +3,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import json
-import subprocess
 from mqtt_client import MqttClient
 from controller import Controller, run_motors
 from datetime import datetime, timedelta
-from automation import Timer, reload_charge
+from automation import Timer
 from functools import partial
 from video import VideoProcessor
 from status import get_status
@@ -15,7 +14,6 @@ from time import time, sleep
 from computer_vision.qr_follower import QrFollower
 from computer_vision.voltage_display import VoltageDisplay
 from computer_vision.calibration import Calibration
-from automation import reload_charge
 import config
 
 
@@ -32,7 +30,6 @@ class RobotPi:
         self.video = VideoProcessor()
         self.qr_follower = QrFollower()
         self.calibration = Calibration()
-        self.reload_timer = Timer(timedelta(minutes=30), partial(reload_charge))
 
         self.video.add_cv_module(self.qr_follower)
         self.video.add_cv_module(self.calibration)
@@ -41,7 +38,6 @@ class RobotPi:
     def on_message(self, message):
         self.last_message = datetime.now()
         if not self.is_running:
-            self.set_usb(on=True)
             self.video.start()
             self.is_running = True
 
@@ -90,7 +86,6 @@ class RobotPi:
     def run(self):
         print("Robotpi is now running!")
         self.mqtt_client.connect()
-        self.set_usb(on=False)
         try:
             while True:
                 self.video.update()
@@ -99,10 +94,8 @@ class RobotPi:
                     seconds=config.IDLE_TIMEOUT_S
                 ):
                     self.is_running = False
-                    print("Timeout, stopping video stream and starting charge.")
+                    print("Timeout, stopping video stream.")
                     self.video.stop()
-
-                self.reload_timer.update()
 
         except KeyboardInterrupt:
             print("Exiting...")
