@@ -16,7 +16,6 @@ from computer_vision.qr_follower import QrFollower
 from computer_vision.voltage_display import VoltageDisplay
 from computer_vision.calibration import Calibration
 from automation import reload_charge
-import charge_controller
 import config
 
 
@@ -69,10 +68,6 @@ class RobotPi:
                 self.mqtt_client.publish_message(
                     "status", message=json.dumps(get_status(self.controller))
                 )
-        elif message == "enable_charging":
-            charge_controller.enable_charge()
-        elif message == "disable_charging":
-            charge_controller.disable_charge()
         elif message == "dock_start" or message == "follow_qr_start":
             self.qr_follower.activate()
         elif message == "dock_stop" or message == "follow_qr_stop":
@@ -106,8 +101,6 @@ class RobotPi:
                     self.is_running = False
                     print("Timeout, stopping video stream and starting charge.")
                     self.video.stop()
-                    self.set_usb(on=False)
-                    charge_controller.enable_charge()
 
                 self.reload_timer.update()
 
@@ -117,18 +110,6 @@ class RobotPi:
         self.video.stop()
         self.mqtt_client.disconnect()
         self.controller.exit()
-        charge_controller.exit()
-
-    def set_usb(self, on):
-        if not on:
-            sleep(2)
-
-        subprocess.run(
-            ["sudo", "uhubctl", "-l", "1-1", "-p", "2", "-a", "1" if on else "0"]
-        )
-
-        if on:
-            sleep(2)
 
 
 print(f"Robotpi starting up with debug set to {config.IS_DEBUG}")
