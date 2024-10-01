@@ -1,40 +1,43 @@
 import config
 from time import sleep
+from typing import Any
 
 if not config.IS_DEBUG:
-    import L298NHBridge
+    import motor_bridge
+
+motor_bridge = None
 
 from functools import partial
 
 
-def run_motors(left=0, right=0, for_seconds=0.0):
+def run_motors(left: float = 0, right: float = 0, for_seconds: float = 0.0):
     set_motors(left, right)
     sleep(for_seconds)
     set_motors(0, 0)
 
 
-def set_motors(left=0, right=0):
-    # They are inverted...
-    L298NHBridge.setMotorRight(left)
-    L298NHBridge.setMotorLeft(right)
+def set_motors(left: float = 0, right: float = 0):
+    if motor_bridge:
+        motor_bridge.set_left_motors(int(left * 100))
+        motor_bridge.set_right_motors(int(right * 100))
 
 
 class Controller:
     def __init__(self):
-        self.power = 1
+        self.power: float = 1
 
-    def handle_message(self, message):
+    def handle_message(self, message: str):
         if config.IS_DEBUG:
             return
 
-        def set_power(left_power_factor, right_power_factor):
+        def set_power(left_power_factor: float, right_power_factor: float):
             return partial(
                 set_motors,
                 self.power * left_power_factor,
                 self.power * right_power_factor,
             )
 
-        controls = {
+        controls: dict[str, Any] = {
             "stop": set_motors,
             "forward": set_power(1, 1),
             "backward": set_power(-1, -1),
@@ -55,16 +58,15 @@ class Controller:
         else:
             print(f"Unkown command: {message}")
 
-    def exec(self, message):
+    def exec(self, message: str):
         self.handle_message(message)
 
     def exit(self):
-        if config.IS_DEBUG:
-            return
-        L298NHBridge.exit()
+        if motor_bridge:
+            motor_bridge.cleanup()
 
     def reverse(self):
         self.power = -self.power
 
-    def set_power(self, pwr):
+    def set_power(self, pwr: float):
         self.power = pwr
