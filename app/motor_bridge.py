@@ -38,7 +38,8 @@ class Motor:
         if percent > 0:
             self.forward_pwm.ChangeDutyCycle(min(percent, PWM_MAX))
         elif percent < 0:
-            self.reverse_pwm.ChangeDutyCycle(max(percent, -PWM_MAX))
+            self.reverse_pwm.ChangeDutyCycle(min(-percent, PWM_MAX))
+
         else:
             self.stop()
 
