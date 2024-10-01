@@ -2,10 +2,10 @@ import config
 from time import sleep
 from typing import Any
 
+motor_bridge = None
+
 if not config.IS_DEBUG:
     import motor_bridge
-
-motor_bridge = None
 
 from functools import partial
 
