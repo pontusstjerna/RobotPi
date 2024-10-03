@@ -1,0 +1,12 @@
+[Unit]
+Description=CatHunter Service
+After=network.target
+
+[Service]
+Type=idle
+Restart=on-failure
+User=root
+ExecStart=/home/pi/RobotPi/.venv/bin/python /home/pi/RobotPi/app/main.py
+
+[Install]
+WantedBy=multi-user.target

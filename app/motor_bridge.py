@@ -4,8 +4,8 @@ io.setmode(io.BCM)
 PWM_MAX = 100
 
 # A:
-#  INT1 = 14 = rear right backward
-#  INT2 = 15 = rear right forward
+#  INT1 = 24 = rear right backward
+#  INT2 = 25 = rear right forward
 #  INT3 = 18 = front right backward
 #  INT4 = 23 = front right forward
 
@@ -48,7 +48,7 @@ class Motor:
         self.reverse_pwm.ChangeDutyCycle(0)
 
 
-rear_right = Motor(15, 14)
+rear_right = Motor(25, 24)
 front_right = Motor(23, 18)
 front_left = Motor(17, 27)
 rear_left = Motor(22, 10)

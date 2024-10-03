@@ -1,6 +1,6 @@
 A:
- INT1 = 14 = rear right backward
- INT2 = 15 = rear right forward
+ INT1 = 24 = rear right backward
+ INT2 = 25 = rear right forward
  INT3 = 18 = front right backward
  INT4 = 23 = front right forward
 
