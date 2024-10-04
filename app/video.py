@@ -81,7 +81,7 @@ class VideoProcessor:
 
         try:
             self.writer.write(img)
-        except Error as e:
+        except Exception as e:
             self.stop()
             print(e)
 
