@@ -79,7 +79,11 @@ class VideoProcessor:
         for module in self.cv_modules:
             module.update(img)
 
-        self.writer.write(img)
+        try:
+            self.writer.write(img)
+        except Error as e:
+            self.stop()
+            print(e)
 
     def add_cv_module(self, module: CVModule):
         self.cv_modules.append(module)
