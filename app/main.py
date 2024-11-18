@@ -50,12 +50,13 @@ class RobotPi:
             ),
         )
         self.last_connected = datetime.now()
+        print("Starting video stream.")
         self.video.start()
-        self.is_running = True
 
     def run(self):
         print("Robotpi is now running!")
         self.mqtt_client.connect()
+        self.is_running = True
 
         try:
             while self.is_running:
