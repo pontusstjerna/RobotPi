@@ -1,6 +1,0 @@
-vcgencmd get_throttled
-vcgencmd measure_temp
-vcgencmd measure_volts core
-vcgencmd measure_volts sdram_c
-vcgencmd measure_volts sdram_i
-vcgencmd measure_volts sdram_p

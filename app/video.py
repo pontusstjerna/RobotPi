@@ -2,7 +2,6 @@ import os
 import cv2
 from vidgear.gears import WriteGear
 import time
-from computer_vision.qr_follower import QrFollower
 from computer_vision.cv_module import CVModule
 
 output_params = {
