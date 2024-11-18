@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 class Timer:
     start_time = datetime.now()
 
@@ -11,4 +12,3 @@ class Timer:
         if self.start_time + self.interval <= datetime.now():
             self.start_time = datetime.now()
             self.action()
-

@@ -1,11 +1,15 @@
 import os
 from paho.mqtt import client as mqtt_client
+from typing import Callable
 
 
 class MqttClient:
-    def __init__(self, on_message):
+    def __init__(
+        self, on_message: Callable[[str], None], on_connect: Callable[[], None]
+    ):
         self.topic = "robotpi"
         self.on_message = on_message
+        self.on_connect = on_connect
 
     def connect(self):
         url = os.environ["MQTT_BROKER_URL"]
@@ -16,6 +20,7 @@ class MqttClient:
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
                 print(f"Successfully connected to MQTT broker {url}")
+                self.on_connect()
             else:
                 print(f"Failed to connect, return code {rc}")
 
