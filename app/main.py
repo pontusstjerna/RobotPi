@@ -11,6 +11,7 @@ from status import get_status
 from computer_vision.voltage_display import VoltageDisplay
 import config
 import os
+import time
 
 
 class RobotPi:
@@ -73,6 +74,8 @@ class RobotPi:
             print("Exiting...")
 
         self.video.stop()
+        self.mqtt_client.publish_message("", "shutdown_pi")
+        time.sleep(1)
         self.mqtt_client.disconnect()
         self.controller.exit()
 
