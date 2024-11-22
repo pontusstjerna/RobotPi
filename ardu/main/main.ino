@@ -16,6 +16,7 @@ void setup() {
   // Initially shutoff Pi
   digitalWrite(RELAY_PIN, LOW);
 
+  
 
   // attempt to connect to Wi-Fi network:
   while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
@@ -32,6 +33,8 @@ void setup() {
     }
   }
 
+  mqttClient.setUsernamePassword(mqtt_user, mqtt_password);
+
   if (!mqttClient.connect(mqtt_broker)) {
     while (1) {
       for (int i = 0; i < 3; i++) {
@@ -46,10 +49,17 @@ void setup() {
 
   mqttClient.onMessage(onMqttMessage);
   mqttClient.subscribe(topic);
+
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(10000);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  mqttClient.poll();
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
   delay(10000);
 }
 

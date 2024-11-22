@@ -41,7 +41,7 @@ class MqttClient:
 
     def publish_message(self, subtopic: str, message: str):
         result = self.client.publish(
-            f"{self.topic}{"" if subtopic == "" else "/"}{subtopic}", message
+            f"{self.topic}{'' if subtopic == '' else '/'}{subtopic}", message
         )
         if result[0] != 0:
             print("Failed to send message!")
