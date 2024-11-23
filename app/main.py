@@ -12,10 +12,15 @@ from computer_vision.voltage_display import VoltageDisplay
 import config
 import os
 import time
+import RPi.GPIO as io
+
+SHUTDOWN_PIN = 26
+
+io.setmode(io.BCM)
+io.setup(SHUTDOWN_PIN, io.IN)
 
 
 class RobotPi:
-    last_message = datetime.now()
     attempted_redocks = 0
 
     def __init__(self):
@@ -28,7 +33,6 @@ class RobotPi:
         self.video.add_cv_module(VoltageDisplay())
 
     def on_message(self, message: str):
-        self.last_message = datetime.now()
 
         if message == "status":
             if config.IS_DEBUG:
@@ -63,9 +67,7 @@ class RobotPi:
             while self.is_running:
                 self.video.update()
 
-                if self.is_running and datetime.now() - self.last_message > timedelta(
-                    seconds=config.IDLE_TIMEOUT_S
-                ):
+                if io.input(SHUTDOWN_PIN) == True:
                     self.is_running = False
                     print("Timeout, shutting down.")
                     self.video.stop()

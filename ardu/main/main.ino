@@ -8,15 +8,12 @@ WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
 const char topic[] = "robotpi";
 
+int last_message_millis = millis();
 
 void setup() {
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // Initially shutoff Pi
-  digitalWrite(RELAY_PIN, LOW);
-
-  
 
   // attempt to connect to Wi-Fi network:
   while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
@@ -61,6 +58,11 @@ void loop() {
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
   delay(10000);
+
+  // More than 6 minutes
+  if ((millis() - last_message_millis) > (6 * 60 * 1000)) {
+    digitalWrite(RELAY_PIN, LOW);
+  }
 }
 
 void onMqttMessage(int messageSize) {
@@ -72,6 +74,7 @@ void onMqttMessage(int messageSize) {
       digitalWrite(RELAY_PIN, LOW);
     } else {
       digitalWrite(RELAY_PIN, HIGH);
+      last_message_millis = millis();
     }
   }
 }
