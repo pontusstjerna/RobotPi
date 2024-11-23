@@ -18,8 +18,8 @@ void setup() {
 
   digitalWrite(SHUTOFF_PIN, LOW);
 
-    // attempt to connect to Wi-Fi network:
-    while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
+  // attempt to connect to Wi-Fi network:
+  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
     digitalWrite(LED_BUILTIN, LOW);
@@ -64,9 +64,9 @@ void loop() {
 
   // More than 6 minutes
   if ((millis() - last_message_millis) > (6 * 60 * 1000)) {
-    // Send shutoff first, wait for 15 seconds and then cut power
-    digitalWrite(SHUTOFF_PIN, LOW);
-    delay(15000);
+    // Send shutoff first, wait for 20 seconds and then cut power
+    digitalWrite(SHUTOFF_PIN, HIGH);
+    delay(20000);
     digitalWrite(RELAY_PIN, LOW);
   }
 }
@@ -74,7 +74,11 @@ void loop() {
 void onMqttMessage(int messageSize) {
   while (mqttClient.available()) {
     String message = mqttClient.readString();
-    if (message != "shutdown_pi") {
+    if (message == "shutdown_pi") {
+      // wait for 15 seconds, then kill power to Pi
+      delay(15000);
+      digitalWrite(RELAY_PIN, LOW);
+    } else {
       digitalWrite(RELAY_PIN, HIGH);
       last_message_millis = millis();
     }
