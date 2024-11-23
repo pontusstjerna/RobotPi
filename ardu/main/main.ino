@@ -1,4 +1,5 @@
 #define RELAY_PIN 2
+#define SHUTOFF_PIN 3
 #include "arduino_secrets.h"
 #include <WiFiNINA.h>
 #include <ArduinoMqttClient.h>
@@ -12,11 +13,13 @@ int last_message_millis = millis();
 
 void setup() {
   pinMode(RELAY_PIN, OUTPUT);
+  pinMode(SHUTOFF_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
+  digitalWrite(SHUTOFF_PIN, LOW);
 
-  // attempt to connect to Wi-Fi network:
-  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
+    // attempt to connect to Wi-Fi network:
+    while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
     digitalWrite(LED_BUILTIN, LOW);
@@ -61,6 +64,9 @@ void loop() {
 
   // More than 6 minutes
   if ((millis() - last_message_millis) > (6 * 60 * 1000)) {
+    // Send shutoff first, wait for 15 seconds and then cut power
+    digitalWrite(SHUTOFF_PIN, LOW);
+    delay(15000);
     digitalWrite(RELAY_PIN, LOW);
   }
 }
@@ -68,11 +74,7 @@ void loop() {
 void onMqttMessage(int messageSize) {
   while (mqttClient.available()) {
     String message = mqttClient.readString();
-    if (message == "shutdown_pi") {
-      // wait for 30 seconds, then kill power to Pi
-      delay(30000);
-      digitalWrite(RELAY_PIN, LOW);
-    } else {
+    if (message != "shutdown_pi") {
       digitalWrite(RELAY_PIN, HIGH);
       last_message_millis = millis();
     }
