@@ -68,6 +68,7 @@ void loop() {
     digitalWrite(SHUTOFF_PIN, HIGH);
     delay(20000);
     digitalWrite(RELAY_PIN, LOW);
+    digitalWrite(SHUTOFF_PIN, LOW);
   }
 }
 
@@ -78,6 +79,7 @@ void onMqttMessage(int messageSize) {
       // wait for 15 seconds, then kill power to Pi
       delay(15000);
       digitalWrite(RELAY_PIN, LOW);
+      digitalWrite(SHUTOFF_PIN, LOW);
     } else {
       digitalWrite(RELAY_PIN, HIGH);
       last_message_millis = millis();
