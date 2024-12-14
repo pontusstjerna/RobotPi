@@ -6,9 +6,7 @@ import json
 from mqtt_client import MqttClient
 from controller import Controller
 from datetime import datetime, timedelta
-from video import VideoProcessor
 from status import get_status
-from computer_vision.voltage_display import VoltageDisplay
 import config
 import os
 import time
@@ -29,8 +27,6 @@ class RobotPi:
         self.is_running = False
         self.mqtt_client = MqttClient(on_message=self.on_message, on_connect=self.start)
         self.controller = Controller()
-        self.video = VideoProcessor()
-        self.video.add_cv_module(VoltageDisplay())
 
     def on_message(self, message: str):
 
@@ -55,8 +51,6 @@ class RobotPi:
             ),
         )
         self.last_connected = datetime.now()
-        print("Starting video stream.")
-        self.video.start()
 
     def run(self):
         print("Robotpi is now running!")
@@ -65,17 +59,14 @@ class RobotPi:
 
         try:
             while self.is_running:
-                self.video.update()
 
                 if io.input(SHUTDOWN_PIN) == True:
                     self.is_running = False
                     print("Timeout, shutting down.")
-                    self.video.stop()
 
         except KeyboardInterrupt:
             print("Exiting...")
 
-        self.video.stop()
         self.mqtt_client.publish_message("", "shutdown_pi")
         time.sleep(1)
         self.mqtt_client.disconnect()
