@@ -4,12 +4,16 @@
 #include <WiFiNINA.h>
 #include <ArduinoMqttClient.h>
 #include <string>
+#include <ArduinoLowPower.h>
 
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
 const char topic[] = "robotpi";
 
 int last_message_millis = millis();
+bool relay_on = false;
+
+void(* resetFunc) (void) = 0; // create a standard reset function
 
 void setup() {
   pinMode(RELAY_PIN, OUTPUT);
@@ -56,19 +60,28 @@ void setup() {
 }
 
 void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+      resetFunc();
+  }
+  if (!mqttClient.connected()) {
+    mqttClient.connect(mqtt_broker);
+  }
+
   mqttClient.poll();
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(10000);
 
   // More than 6 minutes
-  if ((millis() - last_message_millis) > (6 * 60 * 1000)) {
+  if (relay_on && (millis() - last_message_millis) > (6 * 60 * 1000)) {
     // Send shutoff first, wait for 20 seconds and then cut power
     digitalWrite(SHUTOFF_PIN, HIGH);
     delay(20000);
     digitalWrite(RELAY_PIN, LOW);
+    relay_on = false;
     digitalWrite(SHUTOFF_PIN, LOW);
+  } else {
+      LowPower.deepSleep(10000);
   }
 }
 
@@ -81,6 +94,7 @@ void onMqttMessage(int messageSize) {
       digitalWrite(RELAY_PIN, LOW);
       digitalWrite(SHUTOFF_PIN, LOW);
     } else {
+      relay_on = true;
       digitalWrite(RELAY_PIN, HIGH);
       last_message_millis = millis();
     }
