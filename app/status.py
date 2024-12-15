@@ -19,7 +19,4 @@ def get_status(controller):
         "temp": "Super hot",
         "voltage": voltage,
         "current": get_current(),
-        "volts": {
-            "core": voltage
-        }
     }

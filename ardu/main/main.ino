@@ -68,9 +68,15 @@ void loop() {
   }
 
   mqttClient.poll();
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-  digitalWrite(LED_BUILTIN, LOW);
+
+  if (!relay_on) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN, LOW);
+  } else {
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
+  
 
   // More than 6 minutes
   if (relay_on && (millis() - last_message_millis) > (6 * 60 * 1000)) {
@@ -80,8 +86,10 @@ void loop() {
     digitalWrite(RELAY_PIN, LOW);
     relay_on = false;
     digitalWrite(SHUTOFF_PIN, LOW);
+  } else if (relay_on) {
+    delay(10000);
   } else {
-      LowPower.deepSleep(10000);
+    LowPower.deepSleep(10000);
   }
 }
 
