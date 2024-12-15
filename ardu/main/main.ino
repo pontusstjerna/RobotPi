@@ -100,10 +100,11 @@ void onMqttMessage(int messageSize) {
       // wait for 15 seconds, then kill power to Pi
       delay(15000);
       digitalWrite(RELAY_PIN, LOW);
+      relay_on = false;
       digitalWrite(SHUTOFF_PIN, LOW);
     } else {
-      relay_on = true;
       digitalWrite(RELAY_PIN, HIGH);
+      relay_on = true;
       last_message_millis = millis();
     }
   }
