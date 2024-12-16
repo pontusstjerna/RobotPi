@@ -13,31 +13,26 @@ const char topic[] = "robotpi";
 int last_message_millis = millis();
 bool relay_on = false;
 
-void(* resetFunc) (void) = 0; // create a standard reset function
+void (*resetFunc)(void) = 0;  // create a standard reset function
 
-void setup() {
-  pinMode(RELAY_PIN, OUTPUT);
-  pinMode(SHUTOFF_PIN, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  digitalWrite(SHUTOFF_PIN, LOW);
-
+void connectToWifi() {
   // attempt to connect to Wi-Fi network:
-  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_BUILTIN, LOW);
-
-    // Blink while we try to connect...
-    for (int i = 0; i < 10; i++) {
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(500);
-      digitalWrite(LED_BUILTIN, LOW);
-      delay(500);
-    }
+  int status = WiFi.status();
+  if (status != WL_CONNECTED) {
+    WiFi.begin(ssid, pass);
   }
+  while (status != WL_CONNECTED) {
+    status = WiFi.status();
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(500);
+  }
+}
 
-  mqttClient.setUsernamePassword(mqtt_user, mqtt_password);
+void connectToMqtt() {
+
+
 
   if (!mqttClient.connect(mqtt_broker)) {
     while (1) {
@@ -51,8 +46,21 @@ void setup() {
     }
   }
 
-  mqttClient.onMessage(onMqttMessage);
+
   mqttClient.subscribe(topic);
+}
+
+void setup() {
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(SHUTOFF_PIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  digitalWrite(SHUTOFF_PIN, LOW);
+
+  connectToWifi();
+  mqttClient.setUsernamePassword(mqtt_user, mqtt_password);
+  connectToMqtt();
+  mqttClient.onMessage(onMqttMessage);
 
   digitalWrite(LED_BUILTIN, HIGH);
   delay(10000);
@@ -60,14 +68,14 @@ void setup() {
 }
 
 void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
-      resetFunc();
-  }
-  if (!mqttClient.connected()) {
-    mqttClient.connect(mqtt_broker);
-  }
+  connectToWifi();
 
-  mqttClient.poll();
+  if (mqttClient.connected()) {
+    mqttClient.poll();
+  } else {
+    connectToMqtt();
+  }
+    
 
   if (!relay_on) {
     digitalWrite(LED_BUILTIN, HIGH);
@@ -75,8 +83,14 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
   } else {
     digitalWrite(LED_BUILTIN, HIGH);
+    delay(250);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(250);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(250);
+    digitalWrite(LED_BUILTIN, LOW);
   }
-  
+
 
   // More than 6 minutes
   if (relay_on && (millis() - last_message_millis) > (6 * 60 * 1000)) {

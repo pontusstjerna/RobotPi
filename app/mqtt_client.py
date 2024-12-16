@@ -48,6 +48,6 @@ class MqttClient:
 
     def on_message_received(self, topic, userdata, msg):
         decoded_message = msg.payload.decode()
-        print(f"Received {decoded_message} from topic {msg.topic}")
+        # print(f"Received {decoded_message} from topic {msg.topic}")
 
         self.on_message(decoded_message)

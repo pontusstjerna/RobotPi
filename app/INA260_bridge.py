@@ -9,8 +9,8 @@ ina260: Any = None
 try:
     i2c = busio.I2C(board.SCL, board.SDA)
     ina260 = adafruit_ina260.INA260(i2c)
-except ValueError:
-    print("Could not connect to I2C!")
+except ValueError as e:
+    print(f"Could not connect to I2C: {e}")
 
 
 def get_current() -> float:

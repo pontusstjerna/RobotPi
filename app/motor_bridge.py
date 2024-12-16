@@ -10,8 +10,8 @@ PWM_MAX = 100
 #  INT4 = 23 = front right forward
 
 # B:
-#  INT1 = 17 = front left forward
-#  INT2 = 27 = front left backward
+#  INT1 = 27 = front left forward
+#  INT2 = 17 = front left backward
 #  INT3 = 22 = rear left forward
 #  INT4 = 10 = rear left backward
 
@@ -50,7 +50,7 @@ class Motor:
 
 rear_right = Motor(25, 24)
 front_right = Motor(23, 18)
-front_left = Motor(17, 27)
+front_left = Motor(27, 17)
 rear_left = Motor(22, 10)
 
 
