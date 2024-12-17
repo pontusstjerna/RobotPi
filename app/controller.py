@@ -46,9 +46,9 @@ class Controller:
             "right": set_power(1, 0.3),
             "rot_left": set_power(-1, 1),
             "rot_right": set_power(1, -1),
-            "set_power_low": partial(self.set_power, 0.15),
-            "set_power_medium_low": partial(self.set_power, 0.3),
-            "set_power_medium": partial(self.set_power, 0.5),
+            "set_power_low": partial(self.set_power, 0.3),
+            "set_power_medium_low": partial(self.set_power, 0.5),
+            "set_power_medium": partial(self.set_power, 0.75),
             "set_power_high": partial(self.set_power, 1.0),
         }
 
