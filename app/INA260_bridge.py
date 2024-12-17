@@ -14,8 +14,16 @@ except ValueError as e:
 
 
 def get_current() -> float:
-    return ina260.current if ina260 else "Unknown"
+    try:
+        return ina260.current if ina260 else -1
+    except OSError as e:
+        print(f"Error when reading current: {e}")
+        return -1
 
 
 def get_voltage() -> float:
-    return ina260.voltage if ina260 else "Unkown"
+    try:
+        return ina260.voltage if ina260 else -1
+    except OSError as e:
+        print(f"Error when reading voltage: {e}")
+        return -1
