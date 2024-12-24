@@ -6,7 +6,6 @@ import json
 from mqtt_client import MqttClient
 from controller import Controller
 from datetime import datetime, timedelta
-from status import get_status
 import config
 import os
 import time
@@ -29,16 +28,7 @@ class RobotPi:
         self.controller = Controller()
 
     def on_message(self, message: str):
-
-        if message == "status":
-            if config.IS_DEBUG:
-                self.mqtt_client.publish_message("status", None)
-            else:
-                self.mqtt_client.publish_message(
-                    "status", message=json.dumps(get_status(self.controller))
-                )
-        else:
-            self.controller.handle_message(message)
+        self.controller.handle_message(message)
 
     def start(self):
         self.mqtt_client.publish_message(

@@ -1,5 +1,8 @@
 #define RELAY_PIN 2
 #define SHUTOFF_PIN 3
+#define CHARGE_PIN 0
+#define BATTERY_PIN 1
+
 #include "arduino_secrets.h"
 #include <WiFiNINA.h>
 #include <ArduinoMqttClient.h>
@@ -9,6 +12,8 @@
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
 const char topic[] = "robotpi";
+const char status_topic[] = "robotpi/status";
+
 
 int last_message_millis = millis();
 bool relay_on = false;
@@ -75,7 +80,9 @@ void loop() {
   } else {
     connectToMqtt();
   }
-    
+
+  send_status();
+
 
   if (!relay_on) {
     digitalWrite(LED_BUILTIN, HIGH);
@@ -101,10 +108,31 @@ void loop() {
     relay_on = false;
     digitalWrite(SHUTOFF_PIN, LOW);
   } else if (relay_on) {
-    delay(10000);
+    send_status();
+    delay(500);
   } else {
     LowPower.deepSleep(10000);
   }
+}
+
+void send_status() {
+  float charge_voltage = analogRead(CHARGE_PIN) * (5.0 / 1023.0); 
+  float battery_voltage = analogRead(BATTERY_PIN) * (5.0 / 1023.0);
+
+  
+  String is_relay_on = relay_on ? "true" : "false";
+
+  String status = "{\"battery_voltage\": \"";
+  status.concat(battery_voltage);
+  status.concat("\", \"charge_voltage\": \"");
+  status.concat(charge_voltage);
+  status.concat("\", \"relay_on\": \"");
+  status.concat(is_relay_on);
+  status.concat("\"}");
+
+  mqttClient.beginMessage(status_topic);
+  mqttClient.println(status);
+  mqttClient.endMessage();
 }
 
 void onMqttMessage(int messageSize) {
